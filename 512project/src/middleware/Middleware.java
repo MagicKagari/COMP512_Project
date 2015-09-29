@@ -66,6 +66,7 @@ public class Middleware extends ResourceManagerImpl{
 		Middleware middleware = new Middleware("localhost",15080);
 		
 		/* accepting incoming cmd lines for information */
+		System.out.println("Enter RM server in form car,localhost,8082");
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 		boolean ctr = true;
 		while(ctr){

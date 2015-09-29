@@ -9,4 +9,9 @@
       implementation="server.ResourceManagerImpl"
       url-pattern="/service"/>
 
+  <endpoint
+      name="ResourceManager"
+      implementation="middleware.Middleware"
+      url-pattern="/service"/>
+
 </endpoints>
