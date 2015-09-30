@@ -24,10 +24,14 @@ import server.ws.ResourceManager;
 
 public class Middleware implements server.ws.ResourceManager{
 
+	static int REVERSED_PORT_NUMBER = 5; //reserve next ports used to handle multiple client
+	int serverPorts[];
+	HashMap<Integer, Socket> clientMap;
+	
 	
     int _port;
 	String _host;
-    List<RMmeta> resourceManagers;	
+    List<RMmeta> resourceManagers;
 	ServerSocket mainListener;
 	Socket resourceManagerSocket;
 
@@ -35,10 +39,17 @@ public class Middleware implements server.ws.ResourceManager{
 	
 	/* constructor */
 	public Middleware(String host, int port){
+		
 		resourceManagers = new LinkedList<RMmeta>();
 		_port = port;
 		_host = host;
 		socketMap = new HashMap<Socket, ResourceManager>();
+		
+		serverPorts = new int[REVERSED_PORT_NUMBER];
+		for(int i = 0; i< REVERSED_PORT_NUMBER; i++){
+			serverPorts[i] = port + i + 1;
+		}
+		
 		try {
 			mainListener = new ServerSocket(port);
 		} catch (IOException e) {
@@ -60,6 +71,10 @@ public class Middleware implements server.ws.ResourceManager{
 		return null;
 	}
 	
+	/*
+	 * loop function that waiting for client connection,
+	 * create socket to handle it then 
+	 */
 	public void run() throws IOException{
 		while(true){
 			Socket connectionSocket = mainListener.accept();
@@ -71,8 +86,21 @@ public class Middleware implements server.ws.ResourceManager{
 						connectionSocket.getOutputStream());  
 				String clientCommand = inFromClient.readLine();     
 				System.out.println("Received: " + clientCommand);            
-				String clientRet = clientCommand.toUpperCase() + '\n';          
-				outToClient.writeBytes(clientRet);
+				
+				for( RMmeta rm : resourceManagers){
+					String rmHost = rm.getHost();
+					int rmPort = rm.getPort();
+					Socket handler = new Socket(rmHost, rmPort);
+					
+					BufferedReader inFromServer = new BufferedReader(
+		    				new InputStreamReader(handler.getInputStream()));
+		    		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+		    		outToServer.writeBytes(clientCommand + '\n');
+		    		String ret = inFromServer.readLine();
+		    		System.out.println("FROM RM SERVER: " + ret);
+					outToClient.writeBytes(ret);
+				}
+				outToClient.writeBytes("finish.\n");
 			}
 		}
 	}
@@ -135,7 +163,8 @@ public class Middleware implements server.ws.ResourceManager{
 				break;
 			}
 		}
-		System.out.println("Finish gather information for RMs, starting middleware serives.");
+		System.out.println(String.format("Finish gather information for RMs,"
+				+ "starting middleware services on %s %s", middleware.getHost(), middleware.getPort()));
 		
 		try {
 			middleware.run();
@@ -145,6 +174,13 @@ public class Middleware implements server.ws.ResourceManager{
 		}
 	}
 
+	public String getHost(){
+		return _host;
+	}
+	
+	public int getPort(){
+		return _port;
+	}
 	/* implentation */
 	
 	@Override

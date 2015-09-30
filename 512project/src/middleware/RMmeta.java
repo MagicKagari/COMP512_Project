@@ -19,6 +19,14 @@ public class RMmeta {
 		return _type;
 	}
 	
+	public String getHost(){
+		return _host;
+	}
+	
+	public int getPort(){
+		return _port;
+	}
+	
 	@Override
 	public String toString(){
 		return String.format("RM: %s %s %d", _type.toString(),_host, _port);

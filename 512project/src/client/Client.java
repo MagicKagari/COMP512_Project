@@ -46,6 +46,7 @@ public class Client extends WSClient {
     		System.out.println("FROM SERVER: " + ret);
     	}catch (IOException e){
     		e.printStackTrace();
+    		System.exit(-1);
     	}
     }
 
