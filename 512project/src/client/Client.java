@@ -15,8 +15,7 @@ public class Client extends WSClient {
         try {
         
             if (args.length != 3) {
-                System.out.println("Usage: MyClient <service-name> " 
-                        + "<service-host> <service-port>");
+                System.out.println("Usage: MyClient <service-name> <service-host> <service-port>");
                 System.exit(-1);
             }
             
@@ -25,7 +24,7 @@ public class Client extends WSClient {
             int servicePort = Integer.parseInt(args[2]);
             
             Client client = new Client(serviceName, serviceHost, servicePort);
-            
+        
             client.run();
             
         } catch(Exception e) {
@@ -33,6 +32,22 @@ public class Client extends WSClient {
         }
     }
 
+    public void sendMessage(String str){
+    	if(clientSocket == null){
+    		System.out.println("Client socket not setup.");
+    		return;
+    	}
+    	try{
+    		BufferedReader inFromServer = new BufferedReader(
+    				new InputStreamReader(clientSocket.getInputStream()));
+    		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+    		outToServer.writeBytes(str + '\n');
+    		String ret = inFromServer.readLine();
+    		System.out.println("FROM SERVER: " + ret);
+    	}catch (IOException e){
+    		e.printStackTrace();
+    	}
+    }
 
     public void run() {
     
@@ -69,7 +84,9 @@ public class Client extends WSClient {
             //remove heading and trailing white space
             command = command.trim();
             arguments = parse(command);
-            
+            sendMessage(command);
+        }
+            /*
             //decide which of the commands this was
             switch(findChoice((String) arguments.elementAt(0))) {
 
@@ -98,10 +115,7 @@ public class Client extends WSClient {
                     numSeats = getInt(arguments.elementAt(3));
                     flightPrice = getInt(arguments.elementAt(4));
                     
-                    if (proxy.addFlight(id, flightNumber, numSeats, flightPrice))
-                        System.out.println("Flight added");
-                    else
-                        System.out.println("Flight could not be added");
+                    sendMessage(String.format(""));
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
@@ -564,6 +578,7 @@ public class Client extends WSClient {
                 break;
             }
         }
+        */
     }
         
     public Vector parse(String command) {

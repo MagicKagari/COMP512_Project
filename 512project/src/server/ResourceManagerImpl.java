@@ -5,15 +5,75 @@
 
 package server;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.*;
+
 import javax.jws.WebService;
+
+import client.Client;
 
 
 @WebService(targetNamespace = "comp512", endpointInterface = "server.ws.ResourceManager")
 public class ResourceManagerImpl implements server.ws.ResourceManager {
     
     protected RMHashtable m_itemHT = new RMHashtable();
+    ServerSocket resourceManagerServerSocket;
+    String _host;
+    int _port;
     
+    public ResourceManagerImpl(String host, int port){
+    	_host = host;
+    	_port = port;
+    	try {
+			resourceManagerServerSocket = new ServerSocket(port);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public static void main(String[] args) {
+    	try {
+    		if (args.length != 3) {
+    			System.out.println("Usage: MyServer <service-name> <service-host> <service-port>");
+    	        System.exit(-1);
+    	    }
+    	            
+    	    String serviceName = args[0];
+    	    String serviceHost = args[1];
+    	    int servicePort = Integer.parseInt(args[2]);
+    	       
+    	    System.out.println("Starting RM on " + serviceHost + " " + servicePort);
+    		ResourceManagerImpl rManagerImpl = new ResourceManagerImpl(serviceHost, servicePort);
+    		while(true){
+    			rManagerImpl.run();
+    		}
+    	}catch(Exception e) {
+            e.printStackTrace();
+        }
+    	
+	}
+    
+    public void run() throws IOException{
+    	Socket middlewareSocket = resourceManagerServerSocket.accept();
+    	System.out.println("RM: Connection come inå");
+		while(true){
+			BufferedReader inFromClient = new BufferedReader(
+					new InputStreamReader(middlewareSocket.getInputStream())); 
+			DataOutputStream outToClient = new DataOutputStream(
+					middlewareSocket.getOutputStream());  
+			String middlewareCommand = inFromClient.readLine();     
+			System.out.println("Received: " + middlewareCommand);            
+			String middlewareRet = middlewareCommand + " again\n";          
+			outToClient.writeBytes(middlewareRet);
+		}
+    	
+    }
     
     // Basic operations on RMItem //
     

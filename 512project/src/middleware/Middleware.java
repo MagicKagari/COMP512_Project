@@ -1,33 +1,50 @@
 package middleware;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.catalina.Server;
+
+import com.sun.xml.ws.api.pipe.Fiber.Listener;
+
 import middleware.RMmeta.RMtype;
 import server.ResourceManagerImpl;
 import server.ws.ResourceManager;
 
 
-public class Middleware extends ResourceManagerImpl{
+public class Middleware implements server.ws.ResourceManager{
 
 	
     int _port;
 	String _host;
     List<RMmeta> resourceManagers;	
+	ServerSocket mainListener;
+	Socket resourceManagerSocket;
 
+	HashMap<Socket, ResourceManager> socketMap;
 	
 	/* constructor */
 	public Middleware(String host, int port){
 		resourceManagers = new LinkedList<RMmeta>();
 		_port = port;
 		_host = host;
+		socketMap = new HashMap<Socket, ResourceManager>();
+		try {
+			mainListener = new ServerSocket(port);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void addRM(String type, String host, String port){
@@ -41,6 +58,23 @@ public class Middleware extends ResourceManagerImpl{
 			}
 		}
 		return null;
+	}
+	
+	public void run() throws IOException{
+		while(true){
+			Socket connectionSocket = mainListener.accept();
+			System.out.println("MS: Connection come in");
+			while(true){
+				BufferedReader inFromClient = new BufferedReader(
+						new InputStreamReader(connectionSocket.getInputStream())); 
+				DataOutputStream outToClient = new DataOutputStream(
+						connectionSocket.getOutputStream());  
+				String clientCommand = inFromClient.readLine();     
+				System.out.println("Received: " + clientCommand);            
+				String clientRet = clientCommand.toUpperCase() + '\n';          
+				outToClient.writeBytes(clientRet);
+			}
+		}
 	}
 	
 	@Override
@@ -57,16 +91,21 @@ public class Middleware extends ResourceManagerImpl{
 	 */
 	public static void main(String[] args) {
 		
-		//if (args.length != 2){
-		//	System.out.println("Wrong number of pairs of arguments.");
-		//}
 		
-		/* the first pair is the Middleware host and port */
-		//Middleware middleware = new Middleware(args[0], Integer.valueOf(args[1]).intValue());
-		Middleware middleware = new Middleware("localhost",15080);
+		if (args.length != 3){
+			System.out.println("Usage: Middleware <service-name> <service-host> <service-port>");
+			System.exit(-1);
+		}
+		
+		String serviceName = args[0];
+        String serviceHost = args[1];
+        int servicePort = Integer.parseInt(args[2]);
+        Middleware middleware = new Middleware(serviceHost,servicePort);
+		
 		
 		/* accepting incoming cmd lines for information */
-		System.out.println("Enter RM server in form car,localhost,8082");
+		
+		System.out.println("Enter RM server information or finish, example: car,localhost,8082");
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 		boolean ctr = true;
 		while(ctr){
@@ -83,6 +122,7 @@ public class Middleware extends ResourceManagerImpl{
 			 * Example: car,localhost,8082
 			 * or "finish" to end inputing
 			 */
+		
 			switch (input) {
 			case "finish":
 				ctr = false;
@@ -94,11 +134,15 @@ public class Middleware extends ResourceManagerImpl{
 				}
 				break;
 			}
-			
 		}
+		System.out.println("Finish gather information for RMs, starting middleware serives.");
 		
-		System.out.println(middleware.toString());
-		
+		try {
+			middleware.run();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/* implentation */
