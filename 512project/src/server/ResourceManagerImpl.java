@@ -61,19 +61,27 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     
     public void run() throws IOException{
     	Socket middlewareSocket = resourceManagerServerSocket.accept();
-    	System.out.println("RM: Connection come inå");
+    	System.out.println("RM: Connection come in.");
+    	BufferedReader inFromClient = new BufferedReader(
+				new InputStreamReader(middlewareSocket.getInputStream())); 
+		DataOutputStream outToClient = new DataOutputStream(
+				middlewareSocket.getOutputStream());  
+
 		while(true){
-			BufferedReader inFromClient = new BufferedReader(
-					new InputStreamReader(middlewareSocket.getInputStream())); 
-			DataOutputStream outToClient = new DataOutputStream(
-					middlewareSocket.getOutputStream());  
 			String middlewareCommand = inFromClient.readLine();     
 			System.out.println("Received: " + middlewareCommand);            
-			String middlewareRet = middlewareCommand + " again\n";          
-			outToClient.writeBytes(middlewareRet);
+			outToClient.writeBytes(decodeCommand(middlewareCommand) + "\n");
 		}
     	
     }
+    
+    /*
+     * decode the command and execute it
+     */
+    public String decodeCommand(String command){
+    	return "OK";
+    }
+    
     
     // Basic operations on RMItem //
     
