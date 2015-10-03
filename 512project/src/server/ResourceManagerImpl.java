@@ -77,10 +77,552 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     
     /*
      * decode the command and execute it
+     * same parsing style as Client class
      */
     public String decodeCommand(String command){
-    	return "OK";
-    }
+    	
+    	String ret = "";
+    	
+    	 int id;
+         int flightNumber;
+         int flightPrice;
+         int numSeats;
+         boolean room;
+         boolean car;
+         int price;
+         int numRooms;
+         int numCars;
+         String location;
+
+         Vector arguments = new Vector();
+
+         //remove heading and trailing white space
+         command = command.trim();
+         arguments = Client.parse(command);
+         
+         System.out.println("Command: " + command);
+         //decide which of the commands this was
+         switch(Client.findChoice((String) arguments.elementAt(0))) {
+
+         case 1: //help section
+             System.out.println("No such thing.");
+             break;
+             
+         case 2:  //new flight
+             if (arguments.size() != 5) {
+                 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Adding a new Flight using id: " + arguments.elementAt(1));
+             System.out.println("Flight number: " + arguments.elementAt(2));
+             System.out.println("Add Flight Seats: " + arguments.elementAt(3));
+             System.out.println("Set Flight Price: " + arguments.elementAt(4));
+             
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 flightNumber = Client.getInt(arguments.elementAt(2));
+                 numSeats = Client.getInt(arguments.elementAt(3));
+                 flightPrice = Client.getInt(arguments.elementAt(4));
+                 
+                 if(addFlight(id, flightNumber, numSeats, flightPrice)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+                 
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 3:  //new car
+        	 if (arguments.size() != 5) {
+        		 ret = "Wrong argument number.";
+        		 break;
+        	 }
+             System.out.println("Adding a new car using id: " + arguments.elementAt(1));
+             System.out.println("car Location: " + arguments.elementAt(2));
+             System.out.println("Add Number of cars: " + arguments.elementAt(3));
+             System.out.println("Set Price: " + arguments.elementAt(4));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 location = Client.getString(arguments.elementAt(2));
+                 numCars = Client.getInt(arguments.elementAt(3));
+                 price = Client.getInt(arguments.elementAt(4));
+
+                 if(addCars(id, location, numCars, price)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 4:  //new room
+             if (arguments.size() != 5) {
+                 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Adding a new room using id: " + arguments.elementAt(1));
+             System.out.println("room Location: " + arguments.elementAt(2));
+             System.out.println("Add Number of rooms: " + arguments.elementAt(3));
+             System.out.println("Set Price: " + arguments.elementAt(4));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 location = Client.getString(arguments.elementAt(2));
+                 numRooms = Client.getInt(arguments.elementAt(3));
+                 price = Client.getInt(arguments.elementAt(4));
+
+                 if(addRooms(id, location, numRooms, price)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+             }
+             catch(Exception e) {	
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 5:  //new Customer
+             if (arguments.size() != 2) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 int clientID = newCustomer(id);
+                 ret = String.format("Customer ID generated: %d", clientID);
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 6: //delete Flight
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Deleting a flight using id: " + arguments.elementAt(1));
+             System.out.println("Flight Number: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 flightNumber = Client.getInt(arguments.elementAt(2));
+
+                 if(deleteFlight(id, flightNumber)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 7: //delete car
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Deleting the cars from a particular location  using id: " + arguments.elementAt(1));
+             System.out.println("car Location: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 location = Client.getString(arguments.elementAt(2));
+
+                 if(deleteCars(id, location)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+              
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 8: //delete room
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Deleting all rooms from a particular location  using id: " + arguments.elementAt(1));
+             System.out.println("room Location: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 location = Client.getString(arguments.elementAt(2));
+
+                 if(deleteRooms(id, location)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 9: //delete Customer
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 
+                 break;
+             }
+             System.out.println("Deleting a customer from the database using id: " + arguments.elementAt(1));
+             System.out.println("Customer id: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 int customer = Client.getInt(arguments.elementAt(2));
+
+                 if(deleteCustomer(id, customer)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 10: //querying a flight
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 
+                 break;
+             }
+             System.out.println("Querying a flight using id: " + arguments.elementAt(1));
+             System.out.println("Flight number: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 flightNumber = Client.getInt(arguments.elementAt(2));
+                 
+                 int seats = queryFlight(id, flightNumber);
+                 ret = String.format("%d seats available.", seats);
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 11: //querying a car Location
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 
+                 break;
+             }
+             System.out.println("Querying a car location using id: " + arguments.elementAt(1));
+             System.out.println("car location: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 location = Client.getString(arguments.elementAt(2));
+
+                 int cars = queryCars(id, location);
+                 ret = String.format("%d cars available.", cars);
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 12: //querying a room location
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Querying a room location using id: " + arguments.elementAt(1));
+             System.out.println("room location: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 location = Client.getString(arguments.elementAt(2));
+
+                 int rooms = queryRooms(id, location);
+                 ret = String.format("%d rooms available.", rooms);
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 13: //querying Customer Information
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Querying Customer information using id: " + arguments.elementAt(1));
+             System.out.println("Customer id: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 int customer = Client.getInt(arguments.elementAt(2));
+
+                 ret = "Customer info : " + queryCustomerInfo(id, customer);
+                 
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;               
+             
+         case 14: //querying a flight Price
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Querying a flight Price using id: " + arguments.elementAt(1));
+             System.out.println("Flight number: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 flightNumber = Client.getInt(arguments.elementAt(2));
+
+                 ret = "Flight price : " + queryFlightPrice(id, flightNumber);
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 15: //querying a car Price
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Querying a car price using id: " + arguments.elementAt(1));
+             System.out.println("car location: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 location = Client.getString(arguments.elementAt(2));
+
+                 ret = "Car price : " + queryCarsPrice(id, location);
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }                
+             break;
+
+         case 16: //querying a room price
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Querying a room price using id: " + arguments.elementAt(1));
+             System.out.println("room Location: " + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 location = Client.getString(arguments.elementAt(2));
+
+                 ret += "Room price: " + queryRoomsPrice(id, location);
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 17:  //reserve a flight
+             if (arguments.size() != 4) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Reserving a seat on a flight using id: " + arguments.elementAt(1));
+             System.out.println("Customer id: " + arguments.elementAt(2));
+             System.out.println("Flight number: " + arguments.elementAt(3));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 int customer = Client.getInt(arguments.elementAt(2));
+                 flightNumber = Client.getInt(arguments.elementAt(3));
+
+                 if (reserveFlight(id, customer, flightNumber)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 18:  //reserve a car
+             if (arguments.size() != 4) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Reserving a car at a location using id: " + arguments.elementAt(1));
+             System.out.println("Customer id: " + arguments.elementAt(2));
+             System.out.println("Location: " + arguments.elementAt(3));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 int customer = Client.getInt(arguments.elementAt(2));
+                 location = Client.getString(arguments.elementAt(3));
+                 
+                 if (reserveCar(id, customer, location)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+                 
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 19:  //reserve a room
+             if (arguments.size() != 4) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Reserving a room at a location using id: " + arguments.elementAt(1));
+             System.out.println("Customer id: " + arguments.elementAt(2));
+             System.out.println("Location: " + arguments.elementAt(3));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 int customer = Client.getInt(arguments.elementAt(2));
+                 location = Client.getString(arguments.elementAt(3));
+                 
+                 if (reserveRoom(id, customer, location)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         case 20:  //reserve an Itinerary
+        	 /*
+             if (arguments.size()<7) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
+             System.out.println("Customer id: " + arguments.elementAt(2));
+             for (int i = 0; i<arguments.size()-6; i++)
+                 System.out.println("Flight number" + arguments.elementAt(3 + i));
+             System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
+             System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
+             System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
+             try {
+            	 
+                 id = Client.getInt(arguments.elementAt(1));
+                 int customer = Client.getInt(arguments.elementAt(2));
+                 Vector flightNumbers = new Vector();
+                 for (int i = 0; i < arguments.size()-6; i++)
+                     flightNumbers.addElement(arguments.elementAt(3 + i));
+                 location = Client.getString(arguments.elementAt(arguments.size()-3));
+                 car = Client.getBoolean(arguments.elementAt(arguments.size()-2));
+                 room = Client.getBoolean(arguments.elementAt(arguments.size()-1));
+                 
+                 //go through the iternary
+                 boolean result = false;
+                 for(int i = 0; i < flightNumbers.size(); i++){
+                 	flightNumber = Client.getInt(flightNumbers.elementAt(i));
+                 	result = reserveFlight(id, customer, flightNumber);                            
+                 }
+                 if(car){
+                	 result = reserveCar(id, customer, location);
+                 }
+                 if(room){
+                	 result = reserveRoom(id, customer, location);
+                 }
+                 
+                 if(result){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+                 
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             */
+        	 ret = "Wrong command.";
+             break;
+                         
+         case 21: //quit the client
+        	 ret = "Wrong command.";
+        	 break;
+             
+         case 22:  //new Customer given id
+             if (arguments.size() != 3) {
+            	 ret = "Wrong argument number.";
+                 break;
+             }
+             System.out.println("Adding a new Customer using id: "
+                     + arguments.elementAt(1)  +  " and cid "  + arguments.elementAt(2));
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 int customer = Client.getInt(arguments.elementAt(2));
+
+                 
+                 if (newCustomerId(id, customer)){
+                	 ret = "Operation success.";
+                 }else{
+                	 ret = "Operation failed.";
+                 }
+             }
+             catch(Exception e) {
+                 System.out.println("EXCEPTION: ");
+                 System.out.println(e.getMessage());
+                 e.printStackTrace();
+             }
+             break;
+             
+         default:
+             System.out.println("The interface does not support this command.");
+             break;
+         }//end switch
+		return ret;
+     }//end function
     
     
     // Basic operations on RMItem //

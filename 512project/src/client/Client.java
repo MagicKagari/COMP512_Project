@@ -134,7 +134,7 @@ public class Client{
                     numSeats = getInt(arguments.elementAt(3));
                     flightPrice = getInt(arguments.elementAt(4));
                     
-                    sendMessage(String.format("AddFlight,%d,%d,%d,%d",
+                    sendMessage(String.format("NewFlight,%d,%d,%d,%d",
                     		id, flightNumber, numSeats, flightPrice));
                 }
                 catch(Exception e) {
@@ -159,7 +159,7 @@ public class Client{
                     numCars = getInt(arguments.elementAt(3));
                     price = getInt(arguments.elementAt(4));
 
-                    sendMessage(String.format("AddCar,%d,%s,%d,%d",
+                    sendMessage(String.format("NewCar,%d,%s,%d,%d",
                     		id, location, numCars, price));
                 }
                 catch(Exception e) {
@@ -184,7 +184,7 @@ public class Client{
                     numRooms = getInt(arguments.elementAt(3));
                     price = getInt(arguments.elementAt(4));
 
-                    sendMessage(String.format("AddRoom,%d,%s,%d,%d",
+                    sendMessage(String.format("NewRoom,%d,%s,%d,%d",
                     		id, location, numRooms, price));
                 }
                 catch(Exception e) {
@@ -202,7 +202,7 @@ public class Client{
                 System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
                 try {
                     id = getInt(arguments.elementAt(1));
-                    sendMessage(String.format("AddCustomer,%d",id));
+                    sendMessage(String.format("NewCustomer,%d",id));
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
@@ -533,7 +533,7 @@ public class Client{
                     car = getBoolean(arguments.elementAt(arguments.size()-2));
                     room = getBoolean(arguments.elementAt(arguments.size()-1));
                     
-                    //TODO
+                    //Separate flightNumbers as comma
                     String flightNumberString = "";
                     for(int i = 0; i < flightNumbers.size(); i++){
                     	flightNumberString += getInt(flightNumbers.elementAt(i)) + ',';
@@ -588,7 +588,7 @@ public class Client{
         }
     }
         
-    public Vector parse(String command) {
+    static public Vector parse(String command) {
         Vector arguments = new Vector();
         StringTokenizer tokenizer = new StringTokenizer(command, ",");
         String argument = "";
@@ -600,7 +600,7 @@ public class Client{
         return arguments;
     }
     
-    public int findChoice(String argument) {
+    static public int findChoice(String argument) {
         if (argument.compareToIgnoreCase("help") == 0)
             return 1;
         else if (argument.compareToIgnoreCase("newflight") == 0)
@@ -855,7 +855,7 @@ public class Client{
         System.out.println("Type help, <commandname> to check usage of this command.");
     }
 
-    public int getInt(Object temp) throws Exception {
+    static public int getInt(Object temp) throws Exception {
         try {
             return (new Integer((String)temp)).intValue();
         }
@@ -864,7 +864,7 @@ public class Client{
         }
     }
     
-    public boolean getBoolean(Object temp) throws Exception {
+    static public boolean getBoolean(Object temp) throws Exception {
         try {
             return (new Boolean((String)temp)).booleanValue();
         }
@@ -873,7 +873,7 @@ public class Client{
         }
     }
 
-    public String getString(Object temp) throws Exception {
+    static public String getString(Object temp) throws Exception {
         try {    
             return (String)temp;
         }

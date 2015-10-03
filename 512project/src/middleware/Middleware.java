@@ -15,6 +15,8 @@ import java.util.Vector;
 
 import org.apache.catalina.Server;
 
+import client.Client;
+
 import com.sun.xml.ws.api.pipe.Fiber.Listener;
 
 import middleware.RMmeta.RMtype;
@@ -124,7 +126,90 @@ public class Middleware {
 							getRMtype(clientCommand.split(",")[0]));
 					
 					if(desiredRM == null){
-						outToClient.writeBytes("Server is down.\n");
+						//special case where we reserve itinerary
+						if(clientCommand.split(",")[0].contains("Itinerary")){
+							 int id;
+					         int flightNumber;
+					         boolean room;
+					         boolean car;
+					         String location;
+					         Vector arguments = new Vector();
+					         //remove heading and trailing white space
+					         clientCommand = clientCommand.trim();
+					         arguments = Client.parse(clientCommand);
+					         System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
+				             System.out.println("Customer id: " + arguments.elementAt(2));
+				             for (int i = 0; i<arguments.size()-6; i++)
+				                 System.out.println("Flight number" + arguments.elementAt(3 + i));
+				             System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
+				             System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
+				             System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
+				             try {
+				            	 
+				                 id = Client.getInt(arguments.elementAt(1));
+				                 int customer = Client.getInt(arguments.elementAt(2));
+				                 Vector flightNumbers = new Vector();
+				                 for (int i = 0; i < arguments.size()-6; i++)
+				                     flightNumbers.addElement(arguments.elementAt(3 + i));
+				                 location = Client.getString(arguments.elementAt(arguments.size()-3));
+				                 car = Client.getBoolean(arguments.elementAt(arguments.size()-2));
+				                 room = Client.getBoolean(arguments.elementAt(arguments.size()-1));
+				                 
+				                 //go through the iternary
+				                 String command = "";
+				                 String ret = "";
+				                 Socket handler;
+				                 RMmeta rm = getResourceManagerOfType(getRMtype("flight"));
+				                 if(rm != null){
+				                	 handler = rm.getSocket();
+					             	 BufferedReader inFromServer = new BufferedReader(
+							    			new InputStreamReader(handler.getInputStream()));
+							   		 DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+							   		 for(int i = 0; i < flightNumbers.size(); i++){
+					                 	 flightNumber = Client.getInt(flightNumbers.elementAt(i));
+					                 	 command = String.format("ReserveFlight,%d,%d,%d", id, customer, flightNumber);
+					                 	 outToServer.writeBytes(command + '\n');
+					                 	 ret += inFromServer.readLine();                      
+					                 }
+				                 }
+				                 
+				                 if(car){
+				                	 rm = getResourceManagerOfType(getRMtype("car"));
+				                	 if(rm != null){
+				                		 handler = rm.getSocket();
+				                		 BufferedReader inFromServer = new BufferedReader(
+									    			new InputStreamReader(handler.getInputStream()));
+				                		 DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+									   	 command = String.format("ReserveCar,%d,%d,%s", id, customer, location);
+									   	 outToServer.writeBytes(command + '\n');
+									   	 ret += inFromServer.readLine();
+				                	 }
+				                 }
+				                 if(room){
+				                	 rm = getResourceManagerOfType(getRMtype("room"));
+				                	 if(rm != null){
+				                		 handler = rm.getSocket();
+				                		 BufferedReader inFromServer = new BufferedReader(
+									    			new InputStreamReader(handler.getInputStream()));
+				                		 DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+									   	 command = String.format("ReserveRoom,%d,%d,%s", id, customer, location);
+									   	 outToServer.writeBytes(command + '\n');
+									   	 ret += inFromServer.readLine();
+				                	 }
+				                 }
+				                 outToClient.writeBytes(ret + '\n');
+				                 continue;//continue to next waiting loop
+				             }
+				             catch(Exception e) {
+				                 System.out.println("EXCEPTION: ");
+				                 System.out.println(e.getMessage());
+				                 e.printStackTrace();
+				             }
+						}
+						else{
+							//or simply no where to send
+							outToClient.writeBytes("Server is down.\n");
+						}
 						break;
 					}
 					

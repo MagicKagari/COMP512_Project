@@ -84,7 +84,11 @@ Instructions:
    
    Make sure you specify the hostname/IP of the server and the port from step 1.
    
-3. Run some test commands on the client:
+3. Build and launch your middleware on the middleware machine:
+   [userx][lab1-2][proj1]  ant middleware -Dservice.port=9081 
+   
+   
+4. Run some test commands on the client:
 
      [java] Client Interface
      [java] Type "help" for list of supported commands
