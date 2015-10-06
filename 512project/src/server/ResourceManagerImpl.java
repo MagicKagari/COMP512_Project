@@ -29,8 +29,11 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     public ResourceManagerImpl(String host, int port){
     	_host = host;
     	_port = port;
+    }
+    
+    public void initSocket(){
     	try {
-			resourceManagerServerSocket = new ServerSocket(port);
+			resourceManagerServerSocket = new ServerSocket(_port);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -50,6 +53,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     	       
     	    System.out.println("Starting RM on " + serviceHost + " " + servicePort);
     		ResourceManagerImpl rManagerImpl = new ResourceManagerImpl(serviceHost, servicePort);
+    		rManagerImpl.initSocket();
     		while(true){
     			rManagerImpl.run();
     		}

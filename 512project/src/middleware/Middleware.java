@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +25,7 @@ import server.ResourceManagerImpl;
 import server.ws.ResourceManager;
 
 
-public class Middleware {
+public class Middleware extends ResourceManagerImpl{
 
     int _port;
 	String _host;
@@ -34,6 +35,7 @@ public class Middleware {
 	/* constructor */
 	public Middleware(String host, int port){
 		
+		super(host, port);
 		resourceManagers = new LinkedList<RMmeta>();
 		_port = port;
 		_host = host;
@@ -114,7 +116,6 @@ public class Middleware {
 				//read in command send from client  
 				String clientCommand = inFromClient.readLine();  
 				if(clientCommand == null){
-					System.out.println("Received null cmd, close connection.");
 					break;
 				}
 				
@@ -126,8 +127,59 @@ public class Middleware {
 							getRMtype(clientCommand.split(",")[0]));
 					
 					if(desiredRM == null){
+						String firstWord = clientCommand.split(",")[0];
+						
+						//special case where the option is related to customer
+						//it will be broadcast to all RMs
+						if(firstWord.contains("Customer") || firstWord.contains("customer")){
+							//another special case is where we newCustomer
+							//in this case middleware generate a id and use newcustomerid for other RMs
+							if(firstWord.compareToIgnoreCase("newcustomer") == 0){
+								int id = 0;
+						        String location;
+						        Vector arguments = new Vector();
+						        //remove heading and trailing white space
+						        clientCommand = clientCommand.trim();
+						        arguments = Client.parse(clientCommand);
+						        try{
+						        	id = Client.getInt(arguments.elementAt(1));
+						        }catch(Exception e){
+						        	e.printStackTrace();
+						        }
+								int customerId = Integer.parseInt(String.valueOf(id) +
+						                String.valueOf(Calendar.getInstance().get(Calendar.MILLISECOND)) +
+						                String.valueOf(Math.round(Math.random() * 100 + 1)));
+								//call newCustomerID to all other RMs
+								String ret = "";
+								for(RMmeta rm : resourceManagers){
+									Socket handler = rm.getSocket();
+									BufferedReader inFromServer = new BufferedReader(
+							    			new InputStreamReader(handler.getInputStream()));
+							   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+							   		outToServer.writeBytes(String.format("newCustomerID,%d,%d", id, customerId) + "\n");
+							   		ret += inFromServer.readLine();
+								}
+								outToClient.writeBytes(String.format("Customer %d id : %d", id, customerId) + "\n");
+								continue;
+								
+								
+							}else{
+								String ret = "";
+								for(RMmeta rm : resourceManagers){
+									Socket handler = rm.getSocket();
+									BufferedReader inFromServer = new BufferedReader(
+							    			new InputStreamReader(handler.getInputStream()));
+							   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+							   		outToServer.writeBytes(clientCommand + "\n");
+							   		ret += inFromServer.readLine();
+								}
+								outToClient.writeBytes(ret + "\n");
+								continue;
+							}
+						}
+						
 						//special case where we reserve itinerary
-						if(clientCommand.split(",")[0].contains("Itinerary")){
+						if(firstWord.compareToIgnoreCase("itinerary") == 0 ){
 							 int id;
 					         int flightNumber;
 					         boolean room;
@@ -140,7 +192,7 @@ public class Middleware {
 					         System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
 				             System.out.println("Customer id: " + arguments.elementAt(2));
 				             for (int i = 0; i<arguments.size()-6; i++)
-				                 System.out.println("Flight number" + arguments.elementAt(3 + i));
+				                 System.out.println("Flight number: " + arguments.elementAt(3 + i));
 				             System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
 				             System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
 				             System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
@@ -155,12 +207,14 @@ public class Middleware {
 				                 car = Client.getBoolean(arguments.elementAt(arguments.size()-2));
 				                 room = Client.getBoolean(arguments.elementAt(arguments.size()-1));
 				                 
-				                 //go through the iternary
+				                 //go through the itinernary
 				                 String command = "";
 				                 String ret = "";
 				                 Socket handler;
-				                 RMmeta rm = getResourceManagerOfType(getRMtype("flight"));
+
+				                 RMmeta rm = getResourceManagerOfType(getRMtype("Flight"));
 				                 if(rm != null){
+				                	 System.out.println("Handle flight itinerary");
 				                	 handler = rm.getSocket();
 					             	 BufferedReader inFromServer = new BufferedReader(
 							    			new InputStreamReader(handler.getInputStream()));
@@ -174,8 +228,10 @@ public class Middleware {
 				                 }
 				                 
 				                 if(car){
-				                	 rm = getResourceManagerOfType(getRMtype("car"));
+				                	 rm = getResourceManagerOfType(getRMtype("Car"));
 				                	 if(rm != null){
+				                		 System.out.println("Handle car itinerary");
+					                	 
 				                		 handler = rm.getSocket();
 				                		 BufferedReader inFromServer = new BufferedReader(
 									    			new InputStreamReader(handler.getInputStream()));
@@ -185,9 +241,12 @@ public class Middleware {
 									   	 ret += inFromServer.readLine();
 				                	 }
 				                 }
+				                 
 				                 if(room){
-				                	 rm = getResourceManagerOfType(getRMtype("room"));
+				                	 rm = getResourceManagerOfType(getRMtype("Room"));
 				                	 if(rm != null){
+				                		 System.out.println("Handle room itinerary");
+					                	 
 				                		 handler = rm.getSocket();
 				                		 BufferedReader inFromServer = new BufferedReader(
 									    			new InputStreamReader(handler.getInputStream()));
@@ -205,13 +264,14 @@ public class Middleware {
 				                 System.out.println(e.getMessage());
 				                 e.printStackTrace();
 				             }
-						}
+						}//end of itenerary
 						else{
 							//or simply no where to send
 							outToClient.writeBytes("Server is down.\n");
+							continue;
 						}
-						break;
-					}
+						continue;
+					}//end of special case handling
 					
 					Socket handler = desiredRM.getSocket();
 					

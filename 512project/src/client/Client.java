@@ -519,7 +519,7 @@ public class Client{
                 System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
                 System.out.println("Customer id: " + arguments.elementAt(2));
                 for (int i = 0; i<arguments.size()-6; i++)
-                    System.out.println("Flight number" + arguments.elementAt(3 + i));
+                    System.out.println("Flight number: " + arguments.elementAt(3 + i));
                 System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
                 System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
                 System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
@@ -536,13 +536,16 @@ public class Client{
                     //Separate flightNumbers as comma
                     String flightNumberString = "";
                     for(int i = 0; i < flightNumbers.size(); i++){
-                    	flightNumberString += getInt(flightNumbers.elementAt(i)) + ',';
+                    	flightNumberString += getInt(flightNumbers.elementAt(i)) + ",";
                     }
+                    System.out.println("flightNumberString: " + flightNumberString);
                     if(flightNumberString.length() > 1) 
-                    	flightNumberString = flightNumberString.substring(0,flightNumberString.length());
+                    	flightNumberString = flightNumberString.substring(0,flightNumberString.length()-1);
+                    System.out.println("flightNumberString: " + flightNumberString);
                     
-                    sendMessage(String.format("ReserveItinerary,%d,%d,%s,%s,%d,%d",
-                    		id, customer, flightNumberString, location, car, room));
+                    sendMessage(String.format("itinerary,%d,%d,%s,%s,%s,%s",
+                    		id, customer, flightNumberString, location, 
+                    		(car ? "true" : "false"), (room ? "true" : "false")));
                     
                 }
                 catch(Exception e) {
@@ -571,7 +574,7 @@ public class Client{
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
 
-                    sendMessage(String.format("NewCustomer,%d,%d",
+                    sendMessage(String.format("NewCustomerID,%d,%d",
                     		id, customer));
                 }
                 catch(Exception e) {
@@ -869,7 +872,7 @@ public class Client{
             return (new Boolean((String)temp)).booleanValue();
         }
         catch(Exception e) {
-            throw e;
+        	throw e;
         }
     }
 
