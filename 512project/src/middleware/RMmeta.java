@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
 /* a meta data class to hold information of a Resource Manager used by Middleware */
 public class RMmeta {
 
-	enum RMtype {car, room, flight, customer};
+	public enum RMtype {car, room, flight, customer};
 	
 	RMtype _type;
 	String _host;

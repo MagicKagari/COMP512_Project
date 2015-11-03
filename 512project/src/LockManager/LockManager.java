@@ -64,6 +64,7 @@ public class LockManager
                             // lock conversion 
                             // *** ADD CODE HERE *** to carry out the lock conversion in the
                             // lock table
+                        	throw new DeadlockException(xid,strData);
                         } else {
                             // a lock request that is not lock conversion
                             this.lockTable.add(trxnObj);

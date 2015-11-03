@@ -9,6 +9,8 @@ import java.net.SocketException;
 
 public class Client{
 
+	final int TIMEOUT = 1000;
+	
 	Socket clientSocket;
 	String _host;
 	int _port;
@@ -16,6 +18,9 @@ public class Client{
     public Client(String serviceName, String serviceHost, int servicePort)  throws Exception {
     	_host = serviceHost;
     	_port = servicePort;
+    	clientSocket = new Socket();	
+		clientSocket.setSoTimeout(TIMEOUT);
+		clientSocket.connect(new InetSocketAddress(_host, _port), TIMEOUT);
     }
 
     public static void main(String[] args) {
@@ -44,16 +49,6 @@ public class Client{
      * display server output then close connection
      */
     public void sendMessage(String str){
-    	//establish connection
-		try{
-			clientSocket = new Socket();	
-			clientSocket.setSoTimeout(1000);
-			clientSocket.connect(new InetSocketAddress(_host, _port), 1000);
-		} catch (IOException e) {
-			System.out.println("Cannot connect to server.");
-			e.printStackTrace();
-			System.exit(-1);
-		}
     	//try to read and return
     	try{
     		BufferedReader inFromServer = new BufferedReader(

@@ -21,7 +21,7 @@ import client.Client;
 @WebService(targetNamespace = "comp512", endpointInterface = "server.ws.ResourceManager")
 public class ResourceManagerImpl implements server.ws.ResourceManager {
     
-    protected RMHashtable m_itemHT = new RMHashtable();
+	protected RMHashtable m_itemHT = new RMHashtable();
     ServerSocket resourceManagerServerSocket;
     String _host;
     int _port;
