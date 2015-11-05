@@ -8,19 +8,22 @@ import java.net.SocketException;
 
 
 public class Client{
-
-	final int TIMEOUT = 1000;
 	
 	Socket clientSocket;
 	String _host;
 	int _port;
+	BufferedReader inFromServer;
+	DataOutputStream outToServer;
+	
+	
 	
     public Client(String serviceName, String serviceHost, int servicePort)  throws Exception {
     	_host = serviceHost;
-    	_port = servicePort;
-    	clientSocket = new Socket();	
-		clientSocket.setSoTimeout(TIMEOUT);
-		clientSocket.connect(new InetSocketAddress(_host, _port), TIMEOUT);
+    	_port = servicePort;	
+		clientSocket = new Socket(_host, _port);
+		inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		outToServer = new DataOutputStream(clientSocket.getOutputStream());
+		
     }
 
     public static void main(String[] args) {
@@ -46,18 +49,14 @@ public class Client{
 
     /*
      * establish a tcp connection, send the command to server
-     * display server output then close connection
+     * display server output
      */
     public void sendMessage(String str){
     	//try to read and return
     	try{
-    		BufferedReader inFromServer = new BufferedReader(
-    				new InputStreamReader(clientSocket.getInputStream()));
-    		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
     		outToServer.writeBytes(str + '\n');
     		String ret = inFromServer.readLine();
     		System.out.println("FROM SERVER: " + ret);
-    		clientSocket.close();
     	}catch (IOException e){
     		e.printStackTrace();
     		System.exit(-1);
@@ -90,6 +89,7 @@ public class Client{
         
             try {
                 //read the next command
+            	System.out.println("Waiting for next command.");
                 command = stdin.readLine();
             }
             catch (IOException io) {
@@ -578,6 +578,16 @@ public class Client{
                     e.printStackTrace();
                 }
                 break;
+
+            case 23:
+            	sendMessage("start");
+            	break;
+            case 24:
+            	sendMessage("commit");
+            	break;
+            case 25:
+            	sendMessage("abort");
+            	break;
                 
             default:
                 System.out.println("The interface does not support this command.");
@@ -643,6 +653,12 @@ public class Client{
             return 21;
         else if (argument.compareToIgnoreCase("newcustomerid") == 0)
             return 22;
+        else if (argument.compareToIgnoreCase("start") == 0)
+        	return 23;
+        else if (argument.compareToIgnoreCase("commit") == 0)
+        	return 24;
+        else if (argument.compareToIgnoreCase("abort") == 0)
+        	return 25;
         else
             return 666;
     }
@@ -655,6 +671,7 @@ public class Client{
         System.out.println("deletecustomer\nqueryflight\nquerycar\nqueryroom\nquerycustomer");
         System.out.println("queryflightprice\nquerycarprice\nqueryroomprice");
         System.out.println("reserveflight\nreservecar\nreserveroom\nitinerary");
+        System.out.println("start\ncommit\nabort");
         System.out.println("quit");
         System.out.println("\ntype help, <commandname> for detailed info (note the use of comma).");
     }
@@ -841,6 +858,18 @@ public class Client{
             System.out.println("\tnewcustomerid, <id>, <customerid>");
             break;
 
+            case 23: //start transaction
+            System.out.println("Create new transaction");
+            break;
+            
+            case 24: //commit transaction
+            System.out.println("Commit transaction");
+            break;
+            
+            case 25: //abort transaction
+            System.out.println("Abort transaction");
+            break;
+            
             default:
             System.out.println(command);
             System.out.println("The interface does not support this command.");

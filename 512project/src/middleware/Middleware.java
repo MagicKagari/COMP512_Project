@@ -12,18 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.catalina.Server;
-
 import LockManager.LockManager;
-import client.Client;
 import middleware.RMmeta.RMtype;
-import server.ResourceManagerImpl;
-import server.ws.ResourceManager;
-import transaction.Transaction;
 import transaction.TransactionManager;
 
 
-public class Middleware extends ResourceManagerImpl{
+public class Middleware {
 
 	final int CONNECTION_LIMIT = 100;
 	
@@ -39,19 +33,11 @@ public class Middleware extends ResourceManagerImpl{
 	/* constructor */
 	public Middleware(String host, int port){
 		
-		super(host, port);
 		resourceManagers = new LinkedList<RMmeta>();
 		transactionManager = new TransactionManager();
 		executorService = Executors.newFixedThreadPool(CONNECTION_LIMIT);
 		_port = port;
 		_host = host;
-		
-		try {
-			mainListener = new ServerSocket(port, CONNECTION_LIMIT);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	public void addResourceManager(){
@@ -113,6 +99,15 @@ public class Middleware extends ResourceManagerImpl{
 	 */
 	@SuppressWarnings("unchecked")
 	public void run() throws IOException{
+		try {
+			mainListener = new ServerSocket(_port, CONNECTION_LIMIT);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("Waiting for client connection.");
+		
 		while(true){
 			/*
 			 * waiting for a connection from client
@@ -154,7 +149,6 @@ public class Middleware extends ResourceManagerImpl{
 	 */
 	public static void main(String[] args) {
 		
-		
 		if (args.length != 3){
 			System.out.println("Usage: Middleware <service-name> <service-host> <service-port>");
 			System.exit(-1);
@@ -163,12 +157,13 @@ public class Middleware extends ResourceManagerImpl{
 		String serviceName = args[0];
         String serviceHost = args[1];
         int servicePort = Integer.parseInt(args[2]);
+        
+        System.out.println(String.format("Starting middleware services on %s %s",
+        		serviceHost, servicePort));
+		
         Middleware middleware = new Middleware(serviceHost,servicePort);
 		
 		middleware.addResourceManager();
-		System.out.println(String.format("Starting middleware services on %s %s", 
-				middleware.getHost(), middleware.getPort()));
-		
 		try {
 			middleware.run();
 		} catch (IOException e) {

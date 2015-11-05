@@ -53,28 +53,45 @@ public class ClientHandler implements Callable{
 			//start a transaction
 			if(clientCommand.equals("start")){
 				transaction = transactionManager.start();
+				outToClient.writeBytes("start transaction\n");
 				continue;
 			}
 			
-			if(clientCommand.equals("submit")){
-				transactionManager.commit(transaction);
-				//TODO return value of commit
+			//inform customer to start transaction first
+			if(transaction == null){
+				outToClient.writeBytes("Start transaction first.\n");
+				continue;
+			}
+			
+			if(clientCommand.equals("commit")){
+				boolean ret = transactionManager.commit(transaction);
+				if(ret){
+					outToClient.writeBytes("commit transaction success\n");
+				}else{
+					outToClient.writeBytes("commit transaction failed\n");
+				}
 				lockManager.UnlockAll(transaction.getId());
+				transaction = null;
 				continue;
 			}
 			
 			if(clientCommand.equals("abort")){
-				transactionManager.abort(transaction);
-				//TOOD return value of abort
+				boolean ret = transactionManager.abort(transaction);
+				if(ret){
+					outToClient.writeBytes("abort transaction success\n");
+				}else{
+					outToClient.writeBytes("abort transaction failed\n");
+				}
 				lockManager.UnlockAll(transaction.getId());
+				transaction = null;
 				continue;
 			}
 			
+			System.out.println("Parsing client command");
 			String clientCmds[] = clientCommand.split(",");
 			if(clientCmds.length > 0){
 				//decode which RM to send to
 				RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
-				
 				//if command is relate to customer or iternary reserve
 				if(desiredRM == null){
 					String firstWord = clientCmds[0];
@@ -222,16 +239,20 @@ public class ClientHandler implements Callable{
 				
 				//otherwise is the general client command
 				//record operation in transaction
+				System.out.println("Add operation to transaction: "+ transaction.getId());
 				boolean read = false;
 				if(clientCommand.contains("query") || clientCommand.contains("Query")){
 					read = true;
 				}
 				transactionManager.addOperation(transaction,read,desiredRM.getRMtype());
+				System.out.println(transaction.toString());
 				
 				//start requesting RM
+				System.out.println("Requesting RM: " + desiredRM.toString());
 				Socket handler = desiredRM.getSocket();
-				
 				//get the lock
+/*
+				System.out.println("Obtaining lock.");
 				try{
 				    if(read){
 					    lockManager.Lock(transaction.getId(),desiredRM.getRMtype().toString(),
@@ -244,7 +265,9 @@ public class ClientHandler implements Callable{
 					System.out.println("Deadlock");
 					transactionManager.abort(transaction);
 				}
+*/
 				//get RM's response	
+				System.out.println("Requesting RM response.");
 				BufferedReader inFromServer = new BufferedReader(
 		    			new InputStreamReader(handler.getInputStream()));
 		   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());

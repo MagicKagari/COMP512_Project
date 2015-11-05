@@ -28,8 +28,9 @@ public class Transaction {
 		startTime = System.currentTimeMillis();
 	}
 	
+	@Override
 	public String toString(){
-		String ret = String.format("%d;");
+		String ret = String.valueOf(t_id)+';';
 		for(String s : commands){
 			ret += s+';';
 		}

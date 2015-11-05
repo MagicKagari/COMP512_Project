@@ -14,7 +14,7 @@ public class TransactionManager {
 	public TransactionManager(){
 		transactionTable = new ConcurrentHashMap<Transaction, List<RMmeta.RMtype>>();
 		transactionChecker = new TTLchecker(this);
-		transactionChecker.run();
+		transactionChecker.start();
 	}
 	
 	/* start a transaction and add to transaction table */
@@ -51,11 +51,7 @@ public class TransactionManager {
 		return true;
 	}
 	
-	/* record a operation to a transaction 
-	 * 
-	 * 
-	 */
-	
+	/* record a operation to a transaction */
 	public boolean addOperation(Transaction t, boolean read, RMmeta.RMtype type){
 		if(!transactionTable.keySet().contains(t)){
 			System.out.println("Oops where does this transaction come from. "
@@ -89,7 +85,7 @@ class TTLchecker extends Thread{
 			    if(t.isExpired()) tm.abort(t);
 		    }
 		    try {
-			    sleep(10000);
+		    	sleep(10000);
 		    } catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
