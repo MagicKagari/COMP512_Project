@@ -251,7 +251,6 @@ public class ClientHandler implements Callable{
 				System.out.println("Requesting RM: " + desiredRM.toString());
 				Socket handler = desiredRM.getSocket();
 				//get the lock
-/*
 				System.out.println("Obtaining lock.");
 				try{
 				    if(read){
@@ -265,7 +264,6 @@ public class ClientHandler implements Callable{
 					System.out.println("Deadlock");
 					transactionManager.abort(transaction);
 				}
-*/
 				//get RM's response	
 				System.out.println("Requesting RM response.");
 				BufferedReader inFromServer = new BufferedReader(
@@ -277,9 +275,12 @@ public class ClientHandler implements Callable{
 		   		System.out.println("FROM RM SERVER: " + ret);
 		   		
 		   		if(ret == null) ret = "empty";
-		   		
 				outToClient.writeBytes(ret + '\n');
 				System.out.println("Finish writing back to client.");
+				
+				//release lock
+				lockManager.UnlockAll(transaction.getId());
+				
 			}else{
 				System.out.println("Wrong command.");
 				break;

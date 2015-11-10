@@ -24,7 +24,7 @@ class MyThread extends Thread {
     public void run () {
         if (threadId == 1) {
 	    try {
-		lm.Lock (1, "a", LockManager.READ);
+		lm.Lock (1, "RM: car localhost 8000", LockManager.READ);
 	    }
 	    catch (DeadlockException e) {
 	        System.out.println ("Deadlock.... ");
@@ -36,7 +36,7 @@ class MyThread extends Thread {
 	    catch (InterruptedException e) { }
 
 	    try {
-		lm.Lock (1, "b", LockManager.WRITE);
+		lm.Lock (1, "RM: flight localhost 8001", LockManager.WRITE);
 	    }
 	    catch (DeadlockException e) {
 	        System.out.println ("Deadlock.... ");
@@ -46,7 +46,7 @@ class MyThread extends Thread {
 	}
 	else if (threadId == 2) {
 	    try {
-		lm.Lock (2, "b", LockManager.READ);
+		lm.Lock (2, "RM: flight localhost 8001", LockManager.READ);
 	    }
 	    catch (DeadlockException e) { 
 	        System.out.println ("Deadlock.... ");
@@ -58,7 +58,7 @@ class MyThread extends Thread {
 	    catch (InterruptedException e) { }
 
 	    try {
-		lm.Lock (2, "a", LockManager.WRITE);
+		lm.Lock (2, "RM: car localhost 8000", LockManager.WRITE);
 	    }
 	    catch (DeadlockException e) { 
 	        System.out.println ("Deadlock.... ");

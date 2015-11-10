@@ -36,6 +36,7 @@ public class Middleware {
 		resourceManagers = new LinkedList<RMmeta>();
 		transactionManager = new TransactionManager();
 		executorService = Executors.newFixedThreadPool(CONNECTION_LIMIT);
+		lockManager = new LockManager();
 		_port = port;
 		_host = host;
 	}
