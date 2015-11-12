@@ -1,7 +1,12 @@
 package transaction;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import middleware.Middleware;
 import middleware.RMmeta;
 
 public class TransactionManager {
@@ -10,8 +15,10 @@ public class TransactionManager {
 	Random random = new Random();
 	ConcurrentHashMap<Transaction,List<RMmeta.RMtype>> transactionTable; 
 	TTLchecker transactionChecker;
+	Middleware middleware;
 	
-	public TransactionManager(){
+	public TransactionManager(Middleware middleware){
+		this.middleware = middleware;
 		transactionTable = new ConcurrentHashMap<Transaction, List<RMmeta.RMtype>>();
 		transactionChecker = new TTLchecker(this);
 		transactionChecker.start();
@@ -20,8 +27,10 @@ public class TransactionManager {
 	/* start a transaction and add to transaction table */
 	public Transaction start(){
 		Transaction t = new Transaction(random.nextInt(Integer.MAX_VALUE));
-		t.addCommand("start");
-		transactionTable.put(t,new ArrayList<RMmeta.RMtype>());
+		t.addCommand("start","start");
+		ArrayList<RMmeta.RMtype> types = new ArrayList<RMmeta.RMtype>();
+		transactionTable.put(t,types);
+		types.add(null);
 		return t;
 	}
 	
@@ -33,7 +42,7 @@ public class TransactionManager {
 			return false;
 		}
 		System.out.println("COMMIT: "+t.toString());
-		t.addCommand("commit");
+		t.addCommand("commit","commit");
 		transactionTable.remove(t);
 		return true;
 	}
@@ -45,14 +54,61 @@ public class TransactionManager {
 					+ t.toString());
 			return false;
 		}
+		this.middleware.lockManager.UnlockAll(t.getId());
 		System.out.println("ABORTING: "+t.toString());
-		t.addCommand("abort");
+		t.addCommand("abort","abort");
+		//rollback commands
+		for(int i=0; i<t.entireCommands.size(); i++){
+			String command = t.entireCommands.get(i);
+			RMmeta.RMtype type = transactionTable.get(t).get(i);
+			String offset;
+			System.out.println(command);
+			if(command.contains("New")){
+				offset = command.replace("New","Delete");
+				String offsets[] = offset.split(",");
+				offset = String.format("%s,%s,%s",offsets[0], offsets[1], offsets[2]);
+				RMmeta rm = middleware.getResourceManagerOfType(type);
+				Socket handler = rm.getSocket();
+				synchronized (handler) {
+					try{
+						BufferedReader inFromServer = new BufferedReader(
+				    			new InputStreamReader(handler.getInputStream()));
+				   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+				   		outToServer.writeBytes(offset + '\n'); 		
+				   		String ret = inFromServer.readLine();
+				   		
+				   	}catch(Exception e){
+				   		e.printStackTrace();
+				   	}
+				} 
+				continue;
+			}
+			
+			if(command.contains("Delete")){
+				offset = command.replace("Delete","New")+",1,1";
+				RMmeta rm = middleware.getResourceManagerOfType(type);
+				Socket handler = rm.getSocket();
+				synchronized (handler) {
+					try{
+						BufferedReader inFromServer = new BufferedReader(
+				    			new InputStreamReader(handler.getInputStream()));
+				   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+				   		outToServer.writeBytes(offset + '\n'); 		
+				   		String ret = inFromServer.readLine();
+				   	}catch(Exception e){
+				   		e.printStackTrace();
+				   	}
+				}
+				continue;
+			}
+		}
+		
 		transactionTable.remove(t);
 		return true;
 	}
 	
 	/* record a operation to a transaction */
-	public boolean addOperation(Transaction t, boolean read, RMmeta.RMtype type){
+	public boolean addOperation(Transaction t, boolean read, RMmeta.RMtype type, String command){
 		if(!transactionTable.keySet().contains(t)){
 			System.out.println("Oops where does this transaction come from. "
 					+ t.toString());
@@ -64,7 +120,7 @@ public class TransactionManager {
 		}else{
 			cmd = String.format("write(%s)",type.toString());
 		}
-		t.addCommand(cmd);
+		t.addCommand(cmd, command);
 		transactionTable.get(t).add(type);
 		return true;
 	}

@@ -26,7 +26,7 @@ public class Middleware {
     List<RMmeta> resourceManagers;
     
     ExecutorService executorService;
-    LockManager lockManager;
+    public LockManager lockManager;
     TransactionManager transactionManager;
 	ServerSocket mainListener;
 
@@ -34,7 +34,7 @@ public class Middleware {
 	public Middleware(String host, int port){
 		
 		resourceManagers = new LinkedList<RMmeta>();
-		transactionManager = new TransactionManager();
+		transactionManager = new TransactionManager(this);
 		executorService = Executors.newFixedThreadPool(CONNECTION_LIMIT);
 		lockManager = new LockManager();
 		_port = port;

@@ -1,30 +1,34 @@
 package transaction;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.tomcat.jni.Time;
 
 public class Transaction {
 
 	/* TTL constant in ms */
-	final long TTL = 2000000; //2000 secs
+	final long TTL = 200000; //200 secs
 	
 	long startTime;
 	int t_id;
 	boolean isFinished;
-	ArrayList<String> commands;
+	CopyOnWriteArrayList<String> commands;
+	CopyOnWriteArrayList<String> entireCommands;
 	
 	public Transaction(int id){
 		t_id = id;
 		isFinished = false;
-		commands = new ArrayList<String>();
+		commands = new CopyOnWriteArrayList<String>();
+		entireCommands = new CopyOnWriteArrayList<String>();
 	}
 	
-	public void addCommand(String cmd){
+	public void addCommand(String cmd, String command){
 		if(cmd.equals("commit")){
 			isFinished = true;
 		}
 		commands.add(cmd);
+		entireCommands.add(command);
 		startTime = System.currentTimeMillis();
 	}
 	

@@ -87,7 +87,7 @@ public class ClientHandler implements Callable{
 				continue;
 			}
 			
-			System.out.println("Parsing client command");
+//			System.out.println("Parsing client command");
 			String clientCmds[] = clientCommand.split(",");
 			if(clientCmds.length > 0){
 				//decode which RM to send to
@@ -153,13 +153,13 @@ public class ClientHandler implements Callable{
 				         //remove heading and trailing white space
 				         clientCommand = clientCommand.trim();
 				         arguments = Client.parse(clientCommand);
-				         System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
-			             System.out.println("Customer id: " + arguments.elementAt(2));
-			             for (int i = 0; i<arguments.size()-6; i++)
-			                 System.out.println("Flight number: " + arguments.elementAt(3 + i));
-			             System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
-			             System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
-			             System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
+//				         System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
+//			             System.out.println("Customer id: " + arguments.elementAt(2));
+//			             for (int i = 0; i<arguments.size()-6; i++)
+//			                 System.out.println("Flight number: " + arguments.elementAt(3 + i));
+//			             System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
+//			             System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
+//			             System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
 			             try {
 			            	 
 			                 id = Client.getInt(arguments.elementAt(1));
@@ -239,19 +239,19 @@ public class ClientHandler implements Callable{
 				
 				//otherwise is the general client command
 				//record operation in transaction
-				System.out.println("Add operation to transaction: "+ transaction.getId());
+//				System.out.println("Add operation to transaction: "+ transaction.getId());
 				boolean read = false;
 				if(clientCommand.contains("query") || clientCommand.contains("Query")){
 					read = true;
 				}
-				transactionManager.addOperation(transaction,read,desiredRM.getRMtype());
+				transactionManager.addOperation(transaction,read,desiredRM.getRMtype(),clientCommand);
 				System.out.println(transaction.toString());
 				
 				//start requesting RM
-				System.out.println("Requesting RM: " + desiredRM.toString());
+//				System.out.println("Requesting RM: " + desiredRM.toString());
 				Socket handler = desiredRM.getSocket();
 				//get the lock
-				System.out.println("Obtaining lock.");
+//				System.out.println("Obtaining lock.");
 				try{
 				    if(read){
 					    lockManager.Lock(transaction.getId(),desiredRM.getRMtype().toString(),
@@ -263,23 +263,23 @@ public class ClientHandler implements Callable{
 				}catch(DeadlockException e){
 					System.out.println("Deadlock");
 					transactionManager.abort(transaction);
+					lockManager.UnlockAll(transaction.getId());
 				}
 				//get RM's response	
-				System.out.println("Requesting RM response.");
-				BufferedReader inFromServer = new BufferedReader(
-		    			new InputStreamReader(handler.getInputStream()));
-		   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
-		   		outToServer.writeBytes(clientCommand + '\n');
-		   		
-		   		String ret = inFromServer.readLine();
-		   		System.out.println("FROM RM SERVER: " + ret);
-		   		
+//				System.out.println("Requesting RM response.");
+				String ret = null;
+				synchronized (handler) {
+					BufferedReader inFromServer = new BufferedReader(
+			    			new InputStreamReader(handler.getInputStream()));
+			   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+			   		outToServer.writeBytes(clientCommand + '\n'); 		
+			   		ret = inFromServer.readLine();
+				} 
+//		   		System.out.println("FROM RM SERVER: " + ret);
+				
 		   		if(ret == null) ret = "empty";
 				outToClient.writeBytes(ret + '\n');
-				System.out.println("Finish writing back to client.");
-				
-				//release lock
-				lockManager.UnlockAll(transaction.getId());
+//				System.out.println("Finish writing back to client.");
 				
 			}else{
 				System.out.println("Wrong command.");
