@@ -72,9 +72,13 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 				middlewareSocket.getOutputStream());  
 
 		while(true){
-			String middlewareCommand = inFromClient.readLine();     
-			System.out.println("Received: " + middlewareCommand);            
-			outToClient.writeBytes(decodeCommand(middlewareCommand) + "\n");
+			synchronized (inFromClient) {
+				synchronized (outToClient) {
+					String middlewareCommand = inFromClient.readLine();     
+					System.out.println("Received: " + middlewareCommand);            
+					outToClient.writeBytes(decodeCommand(middlewareCommand) + "\n");
+				}
+			}
 		}
     	
     }
@@ -104,6 +108,18 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
          command = command.trim();
          arguments = Client.parse(command);
          
+         if(arguments.size() == 0){
+        	 return "Empty Command";
+         }else{
+        	 for(int i=1; i<arguments.size();i++){
+        		 String s = (String)arguments.get(i);
+        		 try{
+        			 Integer.parseInt(s);
+        		 }catch(NumberFormatException e){
+        			 return "Wrong command format";
+        		 }
+        	 }
+         }
          System.out.println("Command: " + command);
          //decide which of the commands this was
          switch(Client.findChoice((String) arguments.elementAt(0))) {
@@ -941,17 +957,17 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // This method makes testing easier.
     @Override
     public boolean newCustomerId(int id, int customerId) {
-        Trace.info("INFO: RM::newCustomer(" + id + ", " + customerId + ") called.");
+        Trace.info("INFO: RM::newCustomerId(" + id + ", " + customerId + ") called.");
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
         if (cust == null) {
             cust = new Customer(customerId);
             writeData(id, cust.getKey(), cust);
-            Trace.info("INFO: RM::newCustomer(" + id + ", " + customerId + ") OK.");
+            Trace.info("INFO: RM::newCustomerId(" + id + ", " + customerId + ") OK.");
             return true;
         } else {
-            Trace.info("INFO: RM::newCustomer(" + id + ", " + 
+            Trace.info("INFO: RM::newCustomeIdr(" + id + ", " + 
                     customerId + ") failed: customer already exists.");
-            return false;
+            return true;
         }
     }
 
@@ -963,7 +979,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         if (cust == null) {
             Trace.warn("RM::deleteCustomer(" + id + ", " 
                     + customerId + ") failed: customer doesn't exist.");
-            return false;
+            return true;
         } else {            
             // Increase the reserved numbers of all reservable items that 
             // the customer reserved. 

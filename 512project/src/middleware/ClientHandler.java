@@ -59,7 +59,8 @@ public class ClientHandler implements Callable{
 			
 			//inform customer to start transaction first
 			if(transaction == null){
-				outToClient.writeBytes("Start transaction first.\n");
+				transaction = transactionManager.start();
+				outToClient.writeBytes("start transaction\n");
 				continue;
 			}
 			
@@ -119,23 +120,30 @@ public class ClientHandler implements Callable{
 							String ret = "";
 							for(RMmeta rm : middleware.resourceManagers){
 								Socket handler = rm.getSocket();
-								BufferedReader inFromServer = new BufferedReader(
-						    			new InputStreamReader(handler.getInputStream()));
-						   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
-						   		outToServer.writeBytes(String.format("newCustomerID,%d,%d", id, customerId) + "\n");
-						   		ret += inFromServer.readLine();
+								synchronized (handler) {
+									BufferedReader inFromServer = new BufferedReader(
+							    			new InputStreamReader(handler.getInputStream()));
+							   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+							   		outToServer.writeBytes(String.format("newCustomerID,%d,%d", id, customerId) + "\n");
+							   		ret += inFromServer.readLine();
+								}
+								
 							}
+						
 							outToClient.writeBytes(String.format("Customer %d id : %d", id, customerId) + "\n");
 							continue;
 						}else{
 							String ret = "";
 							for(RMmeta rm : middleware.resourceManagers){
 								Socket handler = rm.getSocket();
-								BufferedReader inFromServer = new BufferedReader(
-						    			new InputStreamReader(handler.getInputStream()));
-						   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
-						   		outToServer.writeBytes(clientCommand + "\n");
-						   		ret += inFromServer.readLine();
+								synchronized (handler) {
+									BufferedReader inFromServer = new BufferedReader(
+							    			new InputStreamReader(handler.getInputStream()));
+							   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+							   		outToServer.writeBytes(clientCommand + "\n");
+							   		ret += inFromServer.readLine();
+								}
+								
 							}
 							outToClient.writeBytes(ret + "\n");
 							continue;
@@ -180,15 +188,18 @@ public class ClientHandler implements Callable{
 			                 if(rm != null){
 			                	 System.out.println("Handle flight itinerary");
 			                	 handler = rm.getSocket();
-				             	 BufferedReader inFromServer = new BufferedReader(
-						    			new InputStreamReader(handler.getInputStream()));
-						   		 DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
-						   		 for(int i = 0; i < flightNumbers.size(); i++){
-				                 	 flightNumber = Client.getInt(flightNumbers.elementAt(i));
-				                 	 command = String.format("ReserveFlight,%d,%d,%d", id, customer, flightNumber);
-				                 	 outToServer.writeBytes(command + '\n');
-				                 	 ret += inFromServer.readLine();                      
-				                 }
+			                	 synchronized (handler) {
+			                		 BufferedReader inFromServer = new BufferedReader(
+								    			new InputStreamReader(handler.getInputStream()));
+								   		 DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+								   		 for(int i = 0; i < flightNumbers.size(); i++){
+						                 	 flightNumber = Client.getInt(flightNumbers.elementAt(i));
+						                 	 command = String.format("ReserveFlight,%d,%d,%d", id, customer, flightNumber);
+						                 	 outToServer.writeBytes(command + '\n');
+						                 	 ret += inFromServer.readLine();                      
+						                 }
+								}
+				             	 
 			                 }
 			                 
 			                 if(car){
@@ -197,12 +208,15 @@ public class ClientHandler implements Callable{
 			                		 System.out.println("Handle car itinerary");
 				                	 
 			                		 handler = rm.getSocket();
-			                		 BufferedReader inFromServer = new BufferedReader(
-								    			new InputStreamReader(handler.getInputStream()));
-			                		 DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
-								   	 command = String.format("ReserveCar,%d,%d,%s", id, customer, location);
-								   	 outToServer.writeBytes(command + '\n');
-								   	 ret += inFromServer.readLine();
+			                		 synchronized (handler) {
+			                			 BufferedReader inFromServer = new BufferedReader(
+									    			new InputStreamReader(handler.getInputStream()));
+				                		 DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+									   	 command = String.format("ReserveCar,%d,%d,%s", id, customer, location);
+									   	 outToServer.writeBytes(command + '\n');
+									   	 ret += inFromServer.readLine();
+									}
+			                		 
 			                	 }
 			                 }
 			                 
@@ -212,12 +226,15 @@ public class ClientHandler implements Callable{
 			                		 System.out.println("Handle room itinerary");
 				                	 
 			                		 handler = rm.getSocket();
-			                		 BufferedReader inFromServer = new BufferedReader(
-								    			new InputStreamReader(handler.getInputStream()));
-			                		 DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
-								   	 command = String.format("ReserveRoom,%d,%d,%s", id, customer, location);
-								   	 outToServer.writeBytes(command + '\n');
-								   	 ret += inFromServer.readLine();
+			                		 synchronized (handler) {
+			                			 BufferedReader inFromServer = new BufferedReader(
+									    			new InputStreamReader(handler.getInputStream()));
+				                		 DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
+									   	 command = String.format("ReserveRoom,%d,%d,%s", id, customer, location);
+									   	 outToServer.writeBytes(command + '\n');
+									   	 ret += inFromServer.readLine();
+									}
+			                		 
 			                	 }
 			                 }
 			                 outToClient.writeBytes(ret + '\n');

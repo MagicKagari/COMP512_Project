@@ -12,7 +12,10 @@ import client.Client;
 public class ClientTest {
 
 	ArrayList<ClientRunner> clients;
-	final int CLIENT_SIZE = 2;
+	
+	final int CLIENT_SIZE = 5;
+	final int TPS = 10;
+	int WAIT_TIME = (int)(1149.33*CLIENT_SIZE)/TPS;
 	
 	public ClientTest(String host, int port, int waitTime){
 		clients = new ArrayList<ClientRunner>(CLIENT_SIZE);
@@ -31,6 +34,13 @@ public class ClientTest {
 		}
 	}
 	
+	public boolean checkFinish(){
+		for(ClientRunner c : clients){
+			if(c.isAlive()) return true;
+		}
+		return false;
+	}
+	
 	public static void main(String[] args) {
 		if (args.length != 4) {
            System.out.println("Usage: ClientTest <service-name> <service-host> <service-port> <wait-time>");
@@ -45,8 +55,9 @@ public class ClientTest {
 		ClientTest clientTest = new ClientTest(serviceHost, servicePort, waitTime);
 		clientTest.startTest();
 		while(true){
-			
+			if(!clientTest.checkFinish()) break;
 		}
+		System.out.println("Test finish.");
 	}
 }
 
@@ -107,7 +118,7 @@ class ClientRunner extends Thread{
 			long time = System.currentTimeMillis() - startTime;
 			System.out.println("finish test client: " + this.id + " in: " + time);	
 			try {
-				sleep(time + r.nextInt(WAIT_TIME) + WAIT_TIME);
+				sleep(r.nextInt(WAIT_TIME) + WAIT_TIME/2);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

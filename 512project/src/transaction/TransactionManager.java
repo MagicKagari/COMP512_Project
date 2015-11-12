@@ -56,13 +56,11 @@ public class TransactionManager {
 		}
 		this.middleware.lockManager.UnlockAll(t.getId());
 		System.out.println("ABORTING: "+t.toString());
-		t.addCommand("abort","abort");
 		//rollback commands
 		for(int i=0; i<t.entireCommands.size(); i++){
 			String command = t.entireCommands.get(i);
 			RMmeta.RMtype type = transactionTable.get(t).get(i);
 			String offset;
-			System.out.println(command);
 			if(command.contains("New")){
 				offset = command.replace("New","Delete");
 				String offsets[] = offset.split(",");
@@ -76,7 +74,6 @@ public class TransactionManager {
 				   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
 				   		outToServer.writeBytes(offset + '\n'); 		
 				   		String ret = inFromServer.readLine();
-				   		
 				   	}catch(Exception e){
 				   		e.printStackTrace();
 				   	}
@@ -102,7 +99,7 @@ public class TransactionManager {
 				continue;
 			}
 		}
-		
+		t.addCommand("abort","abort");
 		transactionTable.remove(t);
 		return true;
 	}
@@ -141,7 +138,7 @@ class TTLchecker extends Thread{
 			    if(t.isExpired()) tm.abort(t);
 		    }
 		    try {
-		    	sleep(10000);
+		    	sleep(Transaction.TTL);
 		    } catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
