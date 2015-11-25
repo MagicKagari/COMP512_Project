@@ -114,22 +114,23 @@ public class Client{
                 break;
                 
             case 2:  //new flight
-                if (arguments.size() != 4) {
+                if (arguments.size() != 5) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Adding a new Flight");
-                System.out.println("Flight number: " + arguments.elementAt(1));
-                System.out.println("Add Flight Seats: " + arguments.elementAt(2));
-                System.out.println("Set Flight Price: " + arguments.elementAt(3));
+                System.out.println("Adding a new Flight using id: " + arguments.elementAt(1));
+                System.out.println("Flight number: " + arguments.elementAt(2));
+                System.out.println("Add Flight Seats: " + arguments.elementAt(3));
+                System.out.println("Set Flight Price: " + arguments.elementAt(4));
                 
                 try {
-                    flightNumber = getInt(arguments.elementAt(1));
-                    numSeats = getInt(arguments.elementAt(2));
-                    flightPrice = getInt(arguments.elementAt(3));
+                    id = getInt(arguments.elementAt(1));
+                    flightNumber = getInt(arguments.elementAt(2));
+                    numSeats = getInt(arguments.elementAt(3));
+                    flightPrice = getInt(arguments.elementAt(4));
                     
-                    sendMessage(String.format("NewFlight,%d,%d,%d",
-                    		flightNumber, numSeats, flightPrice));
+                    sendMessage(String.format("NewFlight,%d,%d,%d,%d",
+                    		id, flightNumber, numSeats, flightPrice));
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
@@ -139,21 +140,22 @@ public class Client{
                 break;
                 
             case 3:  //new car
-                if (arguments.size() != 4) {
+                if (arguments.size() != 5) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Adding a new car");
-                System.out.println("car Location: " + arguments.elementAt(1));
-                System.out.println("Add Number of cars: " + arguments.elementAt(2));
-                System.out.println("Set Price: " + arguments.elementAt(3));
+                System.out.println("Adding a new car using id: " + arguments.elementAt(1));
+                System.out.println("car Location: " + arguments.elementAt(2));
+                System.out.println("Add Number of cars: " + arguments.elementAt(3));
+                System.out.println("Set Price: " + arguments.elementAt(4));
                 try {
-                    location = getString(arguments.elementAt(1));
-                    numCars = getInt(arguments.elementAt(2));
-                    price = getInt(arguments.elementAt(3));
+                    id = getInt(arguments.elementAt(1));
+                    location = getString(arguments.elementAt(2));
+                    numCars = getInt(arguments.elementAt(3));
+                    price = getInt(arguments.elementAt(4));
 
-                    sendMessage(String.format("NewCar,%s,%d,%d",
-                    		location, numCars, price));
+                    sendMessage(String.format("NewCar,%d,%s,%d,%d",
+                    		id, location, numCars, price));
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
@@ -163,21 +165,22 @@ public class Client{
                 break;
                 
             case 4:  //new room
-                if (arguments.size() != 4) {
+                if (arguments.size() != 5) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Adding a new room");
-                System.out.println("room Location: " + arguments.elementAt(1));
-                System.out.println("Add Number of rooms: " + arguments.elementAt(2));
-                System.out.println("Set Price: " + arguments.elementAt(3));
+                System.out.println("Adding a new room using id: " + arguments.elementAt(1));
+                System.out.println("room Location: " + arguments.elementAt(2));
+                System.out.println("Add Number of rooms: " + arguments.elementAt(3));
+                System.out.println("Set Price: " + arguments.elementAt(4));
                 try {
-                    location = getString(arguments.elementAt(1));
-                    numRooms = getInt(arguments.elementAt(2));
-                    price = getInt(arguments.elementAt(3));
+                    id = getInt(arguments.elementAt(1));
+                    location = getString(arguments.elementAt(2));
+                    numRooms = getInt(arguments.elementAt(3));
+                    price = getInt(arguments.elementAt(4));
 
-                    sendMessage(String.format("NewRoom,%s,%d,%d",
-                    		location, numRooms, price));
+                    sendMessage(String.format("NewRoom,%d,%s,%d,%d",
+                    		id, location, numRooms, price));
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
@@ -187,13 +190,14 @@ public class Client{
                 break;
                 
             case 5:  //new Customer
-                if (arguments.size() != 1) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Adding a new Customer");
+                System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
                 try {
-                    sendMessage(String.format("NewCustomer"));
+                    id = getInt(arguments.elementAt(1));
+                    sendMessage(String.format("NewCustomer,%d",id));
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");

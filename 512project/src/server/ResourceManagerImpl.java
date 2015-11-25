@@ -153,6 +153,8 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              
              try {
                  id = Client.getInt(arguments.elementAt(1));
+                 
+                 
                  flightNumber = Client.getInt(arguments.elementAt(2));
                  numSeats = Client.getInt(arguments.elementAt(3));
                  flightPrice = Client.getInt(arguments.elementAt(4));
