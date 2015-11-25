@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Calendar;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 
@@ -53,23 +54,29 @@ public class ClientHandler implements Callable{
 			//start a transaction
 			if(clientCommand.equals("start")){
 				transaction = transactionManager.start();
-				outToClient.writeBytes(String.format("start transaction, id=%s \n"));
+				synchronized (outToClient) {
+				    outToClient.writeBytes("start transaction\n");
+                }
 				continue;
 			}
 			
 			//inform customer to start transaction first
 			if(transaction == null){
 				transaction = transactionManager.start();
-				outToClient.writeBytes("start transaction\n");
+				synchronized (outToClient) {
+				    outToClient.writeBytes("start transaction\n");
+                }
 				continue;
 			}
 			
 			if(clientCommand.equals("commit")){
 				boolean ret = transactionManager.commit(transaction);
-				if(ret){
-					outToClient.writeBytes("commit transaction success\n");
-				}else{
-					outToClient.writeBytes("commit transaction failed\n");
+				synchronized (outToClient) {
+				    if(ret){
+    					outToClient.writeBytes("commit transaction success\n");
+    				}else{
+    					outToClient.writeBytes("commit transaction failed\n");
+    				}
 				}
 				lockManager.UnlockAll(transaction.getId());
 				transaction = null;
@@ -78,11 +85,13 @@ public class ClientHandler implements Callable{
 			
 			if(clientCommand.equals("abort")){
 				boolean ret = transactionManager.abort(transaction);
-				if(ret){
-					outToClient.writeBytes("abort transaction success\n");
-				}else{
-					outToClient.writeBytes("abort transaction failed\n");
-				}
+				synchronized (outToClient) {
+				    if(ret){
+    					outToClient.writeBytes("abort transaction success\n");
+    				}else{
+    					outToClient.writeBytes("abort transaction failed\n");
+    				}
+    			}
 				lockManager.UnlockAll(transaction.getId());
 				transaction = null;
 				continue;
@@ -123,20 +132,7 @@ public class ClientHandler implements Callable{
 						//another special case is where we newCustomer
 						//in this case, generate a id and use newcustomerid for other RMs
 						if(firstWord.compareToIgnoreCase("newcustomer") == 0){
-							int id = 0;
-					        String location;
-					        Vector arguments = new Vector();
-					        //remove heading and trailing white space
-					        clientCommand = clientCommand.trim();
-					        arguments = Client.parse(clientCommand);
-					        try{
-					        	id = Client.getInt(arguments.elementAt(1));
-					        }catch(Exception e){
-					        	e.printStackTrace();
-					        }
-							int customerId = Integer.parseInt(String.valueOf(id) +
-					                String.valueOf(Calendar.getInstance().get(Calendar.MILLISECOND)) +
-					                String.valueOf(Math.round(Math.random() * 100 + 1)));
+							String customerId = String.valueOf((new Random()).nextInt(Integer.MAX_VALUE));
 							//call newCustomerID to all other RMs
 							String ret = "";
 							for(RMmeta rm : middleware.resourceManagers){
@@ -145,13 +141,11 @@ public class ClientHandler implements Callable{
 									BufferedReader inFromServer = new BufferedReader(
 							    			new InputStreamReader(handler.getInputStream()));
 							   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
-							   		outToServer.writeBytes(String.format("newCustomerID,%d,%d", id, customerId) + "\n");
+							   		outToServer.writeBytes(String.format("newCustomerID,%d,%s", transaction.getId(), customerId) + "\n");
 							   		ret += inFromServer.readLine();
 								}
-								
-							}
-						
-							outToClient.writeBytes(String.format("Customer %d id : %d", id, customerId) + "\n");
+							}				
+							outToClient.writeBytes(String.format("Customer %d id : %s", transaction.getId(), customerId) + "\n");
 							continue;
 						}else{
 							String ret = "";

@@ -33,21 +33,22 @@ public class TransactionManager {
 		types.add(null);
 		
 		List<RMmeta> rms = middleware.resourceManagers;
-		for(RMmeta rm : rms){
-		    Socket s = rm.getSocket();
-		    synchronized (s) {
-		        try{
-                    BufferedReader inFromServer = new BufferedReader(
-                            new InputStreamReader(s.getInputStream()));
-                    DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
-                    outToServer.writeBytes("start,"+t.getId() + '\n');      
-                    System.out.println(inFromServer.readLine());
-                }catch(Exception e){
-                    e.printStackTrace();
+		synchronized (rms) {
+    		for(RMmeta rm : rms){
+    		    Socket s = rm.getSocket();
+    		    synchronized (s) {
+    		        try{
+                        BufferedReader inFromServer = new BufferedReader(
+                                new InputStreamReader(s.getInputStream()));
+                        DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                        outToServer.writeBytes("start,"+t.getId() + '\n');      
+                        System.out.println(inFromServer.readLine());
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
                 }
-            }
+    		}
 		}
-		
 		return t;
 	}
 	
@@ -62,21 +63,22 @@ public class TransactionManager {
 		t.addCommand("commit","commit");
 		
 		List<RMmeta> rms = middleware.resourceManagers;
-        for(RMmeta rm : rms){
-            Socket s = rm.getSocket();
-            synchronized (s) {
-                try{
-                    BufferedReader inFromServer = new BufferedReader(
-                            new InputStreamReader(s.getInputStream()));
-                    DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
-                    outToServer.writeBytes("commit,"+t.getId() + '\n');      
-                    System.out.println(inFromServer.readLine());
-                }catch(Exception e){
-                    e.printStackTrace();
+		synchronized (rms) {
+            for(RMmeta rm : rms){
+                Socket s = rm.getSocket();
+                synchronized (s) {
+                    try{
+                        BufferedReader inFromServer = new BufferedReader(
+                                new InputStreamReader(s.getInputStream()));
+                        DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                        outToServer.writeBytes("commit,"+t.getId() + '\n');      
+                        System.out.println(inFromServer.readLine());
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
                 }
             }
-        }
-		
+		}
 		transactionTable.remove(t);
 		return true;
 	}
@@ -92,17 +94,20 @@ public class TransactionManager {
 		System.out.println("ABORTING: "+t.toString());
 		
 		List<RMmeta> rms = middleware.resourceManagers;
-        for(RMmeta rm : rms){
-            Socket s = rm.getSocket();
-            synchronized (s) {
-                try{
-                    BufferedReader inFromServer = new BufferedReader(
-                            new InputStreamReader(s.getInputStream()));
-                    DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
-                    outToServer.writeBytes("abort,"+t.getId() + '\n');      
-                    System.out.println(inFromServer.readLine());
-                }catch(Exception e){
-                    e.printStackTrace();
+		synchronized (rms) {
+           
+            for(RMmeta rm : rms){
+                Socket s = rm.getSocket();
+                synchronized (s) {
+                    try{
+                        BufferedReader inFromServer = new BufferedReader(
+                                new InputStreamReader(s.getInputStream()));
+                        DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                        outToServer.writeBytes("abort,"+t.getId() + '\n');      
+                        System.out.println(inFromServer.readLine());
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
                 }
             }
         }
