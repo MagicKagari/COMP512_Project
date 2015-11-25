@@ -23,7 +23,7 @@ public class Middleware {
 	
     int _port;
 	String _host;
-    List<RMmeta> resourceManagers;
+    public List<RMmeta> resourceManagers;
     
     ExecutorService executorService;
     public LockManager lockManager;
@@ -123,13 +123,13 @@ public class Middleware {
 	 * return a RMtype according to sendMessage defined in Client class
 	 */
 	public RMtype getRMtype(String str){
-		if(str.contains("Flight")){
+		if(str.contains("Flight")||str.contains("flight")){
 			return RMtype.flight;
-		}else if(str.contains("Car")){
+		}else if(str.contains("Car")||str.contains("car")){
 			return RMtype.car;
-		}else if(str.contains("Room")){
+		}else if(str.contains("Room")||str.contains("room")){
 			return RMtype.room;
-		}else if(str.contains("Customer")){
+		}else if(str.contains("Customer")||str.contains("customer")){
 			return RMtype.customer;
 		}else{
 			return null;

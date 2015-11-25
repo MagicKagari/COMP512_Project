@@ -6,12 +6,17 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jws.WebService;
 
@@ -22,6 +27,14 @@ import client.Client;
 public class ResourceManagerImpl implements server.ws.ResourceManager {
     
 	protected RMHashtable m_itemHT = new RMHashtable();
+	Long lastModifiedTime = new Long(System.currentTimeMillis());
+	
+	//a copy of the rm table for each transaction id
+	protected ConcurrentHashMap<Integer,RMHashtable> transaction_table = 
+	        new ConcurrentHashMap<Integer,RMHashtable>();
+	protected ConcurrentHashMap<Integer,Long> lastTransactionActivityTime =
+	        new ConcurrentHashMap<Integer,Long>();
+	
     ServerSocket resourceManagerServerSocket;
     String _host;
     int _port;
@@ -140,6 +153,8 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              
              try {
                  id = Client.getInt(arguments.elementAt(1));
+                 
+                 
                  flightNumber = Client.getInt(arguments.elementAt(2));
                  numSeats = Client.getInt(arguments.elementAt(3));
                  flightPrice = Client.getInt(arguments.elementAt(4));
@@ -637,6 +652,74 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              }
              break;
              
+         case 23://start
+                try {
+                    id = Client.getInt(arguments.elementAt(1));
+                    transaction_table.put(new Integer(id), deepClone());
+                    lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+                    ret = "Operation success.";
+                } catch (Exception e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+             break;
+         case 24://commit
+             
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 RMHashtable t = transaction_table.get(new Integer(id));
+                 Long lastTime = lastTransactionActivityTime.get(new Integer(id));
+                 synchronized (lastModifiedTime) {
+                    synchronized (m_itemHT) {
+                        if(lastTime < lastModifiedTime){
+                            //TODO abort the part on other RMs
+                            ret = "Operation failed. New version of data available.";
+                            transaction_table.remove(new Integer(id));
+                            lastTransactionActivityTime.remove(new Integer(id));           
+                        }else{
+                            m_itemHT = t;
+                            transaction_table.remove(new Integer(id));
+                            lastTransactionActivityTime.remove(new Integer(id)); 
+                            lastModifiedTime = new Long(System.currentTimeMillis());
+                        }
+                    }
+                 }
+                
+             } catch (Exception e1) {
+                 // TODO Auto-generated catch block
+                 e1.printStackTrace();
+             }
+             break;
+             
+         case 25://abort
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 boolean isFound = false;
+                 if(transaction_table.keySet().contains(new Integer(id))){
+                     transaction_table.remove(new Integer(id));
+                     lastTransactionActivityTime.remove(new Integer(id));
+                     ret = "Operation success.";
+                 }else{
+                     ret = "Operation failed.";
+                 }
+             } catch (Exception e1) {
+                 // TODO Auto-generated catch block
+                 e1.printStackTrace();
+             }
+             
+             break;
+             
+         case 26: //print
+             System.out.println("Printing RM");
+                try {
+                    ObjectOutputStream o = new ObjectOutputStream(System.out);
+                    o.writeObject(m_itemHT);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+             
+             break;
          default:
              System.out.println("The interface does not support this command.");
              break;
@@ -649,23 +732,43 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     
     // Read a data item.
     private RMItem readData(int id, String key) {
+        RMHashtable t = transaction_table.get(new Integer(id));
+        synchronized(t){
+            return (RMItem) t.get(key);
+        }
+        /*
         synchronized(m_itemHT) {
             return (RMItem) m_itemHT.get(key);
         }
+        */
     }
 
     // Write a data item.
     private void writeData(int id, String key, RMItem value) {
+        RMHashtable t = transaction_table.get(new Integer(id));
+        synchronized(t){
+            t.put(key, value);
+            lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+        }
+        /*
         synchronized(m_itemHT) {
             m_itemHT.put(key, value);
         }
+        */
     }
     
     // Remove the item out of storage.
     protected RMItem removeData(int id, String key) {
+        RMHashtable t = transaction_table.get(new Integer(id));
+        synchronized(t){
+            lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+            return (RMItem)t.remove(key);
+        }
+        /*
         synchronized(m_itemHT) {
             return (RMItem) m_itemHT.remove(key);
         }
+        */
     }
     
     
@@ -1066,4 +1169,20 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         return false;
     }
 
+    private RMHashtable deepClone(){
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(m_itemHT);
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            return (RMHashtable) ois.readObject();
+        } catch (IOException e) {
+            return null;
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+    
 }

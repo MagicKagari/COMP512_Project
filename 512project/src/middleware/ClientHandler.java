@@ -53,7 +53,7 @@ public class ClientHandler implements Callable{
 			//start a transaction
 			if(clientCommand.equals("start")){
 				transaction = transactionManager.start();
-				outToClient.writeBytes("start transaction\n");
+				outToClient.writeBytes(String.format("start transaction, id=%s \n"));
 				continue;
 			}
 			
@@ -88,9 +88,30 @@ public class ClientHandler implements Callable{
 				continue;
 			}
 			
-//			System.out.println("Parsing client command");
+			//switch second argument id to transaction id
 			String clientCmds[] = clientCommand.split(",");
+			clientCmds[1] = String.valueOf(transaction.getId());
+			clientCommand = clientCmds[0];
+			for(int i=1; i<clientCmds.length;i++){
+			    clientCommand += ','+clientCmds[i];
+			}
+			
 			if(clientCmds.length > 0){
+			    //test command for print rm
+			    if(clientCmds[0].equals("printRM")){
+			        String rm_to_print = clientCmds[1];
+			        RMmeta rm_to_print_meta = middleware.getResourceManagerOfType(rm_to_print);
+			        Socket s = rm_to_print_meta.getSocket();
+			        synchronized (s) {
+                        BufferedReader inFromServer = new BufferedReader(
+                                new InputStreamReader(s.getInputStream()));
+                        DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                        outToServer.writeBytes("printRM\n");
+                        String ret = inFromServer.readLine();
+                        outToClient.writeBytes("printRM\n");
+                    }
+			        continue;
+			    }
 				//decode which RM to send to
 				RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
 				//if command is relate to customer or iternary reserve
@@ -256,7 +277,7 @@ public class ClientHandler implements Callable{
 				
 				//otherwise is the general client command
 				//record operation in transaction
-//				System.out.println("Add operation to transaction: "+ transaction.getId());
+				System.out.println("Add operation to transaction: "+ transaction.getId());
 				boolean read = false;
 				if(clientCommand.contains("query") || clientCommand.contains("Query")){
 					read = true;
@@ -265,10 +286,10 @@ public class ClientHandler implements Callable{
 				System.out.println(transaction.toString());
 				
 				//start requesting RM
-//				System.out.println("Requesting RM: " + desiredRM.toString());
+				System.out.println("Requesting RM: " + desiredRM.toString());
 				Socket handler = desiredRM.getSocket();
 				//get the lock
-//				System.out.println("Obtaining lock.");
+				System.out.println("Obtaining lock.");
 				try{
 				    if(read){
 					    lockManager.Lock(transaction.getId(),desiredRM.getRMtype().toString(),
@@ -283,7 +304,7 @@ public class ClientHandler implements Callable{
 					lockManager.UnlockAll(transaction.getId());
 				}
 				//get RM's response	
-//				System.out.println("Requesting RM response.");
+				System.out.println("Requesting RM response.");
 				String ret = null;
 				synchronized (handler) {
 					BufferedReader inFromServer = new BufferedReader(
@@ -292,17 +313,19 @@ public class ClientHandler implements Callable{
 			   		outToServer.writeBytes(clientCommand + '\n'); 		
 			   		ret = inFromServer.readLine();
 				} 
-//		   		System.out.println("FROM RM SERVER: " + ret);
+	   		System.out.println("FROM RM SERVER: " + ret);
 				
 		   		if(ret == null) ret = "empty";
 				outToClient.writeBytes(ret + '\n');
-//				System.out.println("Finish writing back to client.");
+				System.out.println("Finish writing back to client.");
 				
 			}else{
 				System.out.println("Wrong command.");
 				break;
 			}
+			
 		}
 		return null;
+		
 	}
 }

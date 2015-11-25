@@ -31,6 +31,23 @@ public class TransactionManager {
 		ArrayList<RMmeta.RMtype> types = new ArrayList<RMmeta.RMtype>();
 		transactionTable.put(t,types);
 		types.add(null);
+		
+		List<RMmeta> rms = middleware.resourceManagers;
+		for(RMmeta rm : rms){
+		    Socket s = rm.getSocket();
+		    synchronized (s) {
+		        try{
+                    BufferedReader inFromServer = new BufferedReader(
+                            new InputStreamReader(s.getInputStream()));
+                    DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                    outToServer.writeBytes("start,"+t.getId() + '\n');      
+                    System.out.println(inFromServer.readLine());
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+		}
+		
 		return t;
 	}
 	
@@ -43,6 +60,23 @@ public class TransactionManager {
 		}
 		System.out.println("COMMIT: "+t.toString());
 		t.addCommand("commit","commit");
+		
+		List<RMmeta> rms = middleware.resourceManagers;
+        for(RMmeta rm : rms){
+            Socket s = rm.getSocket();
+            synchronized (s) {
+                try{
+                    BufferedReader inFromServer = new BufferedReader(
+                            new InputStreamReader(s.getInputStream()));
+                    DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                    outToServer.writeBytes("commit,"+t.getId() + '\n');      
+                    System.out.println(inFromServer.readLine());
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+		
 		transactionTable.remove(t);
 		return true;
 	}
@@ -56,6 +90,23 @@ public class TransactionManager {
 		}
 		this.middleware.lockManager.UnlockAll(t.getId());
 		System.out.println("ABORTING: "+t.toString());
+		
+		List<RMmeta> rms = middleware.resourceManagers;
+        for(RMmeta rm : rms){
+            Socket s = rm.getSocket();
+            synchronized (s) {
+                try{
+                    BufferedReader inFromServer = new BufferedReader(
+                            new InputStreamReader(s.getInputStream()));
+                    DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                    outToServer.writeBytes("abort,"+t.getId() + '\n');      
+                    System.out.println(inFromServer.readLine());
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+		/*
 		//rollback commands
 		for(int i=0; i<t.entireCommands.size(); i++){
 			String command = t.entireCommands.get(i);
@@ -99,6 +150,7 @@ public class TransactionManager {
 				continue;
 			}
 		}
+		*/
 		t.addCommand("abort","abort");
 		transactionTable.remove(t);
 		return true;

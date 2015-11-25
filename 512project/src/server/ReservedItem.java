@@ -5,12 +5,13 @@
 
 package server;
 
+import java.io.Serializable;
 
 // Represents a customer's "reserved item" (e.g. Flight, Car, or Room).
 // Note: if a customer reserves more than one item of the same kind, this is 
 // stored as a single instance of ReservedItem reflecting the *latest price*.
 
-public class ReservedItem extends RMItem {
+public class ReservedItem extends RMItem{
 
     private int m_nCount;
     private int m_nPrice;

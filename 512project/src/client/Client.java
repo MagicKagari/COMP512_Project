@@ -28,7 +28,7 @@ public class Client{
 
     public static void main(String[] args) {
         if (args.length != 3) {
-           //System.out.println("Usage: MyClient <service-name> <service-host> <service-port>");
+           System.out.println("Usage: MyClient <service-name> <service-host> <service-port>");
            System.exit(-1);
         }
             
@@ -56,7 +56,7 @@ public class Client{
     	try{
     		outToServer.writeBytes(str + '\n');
     		String ret = inFromServer.readLine();
-    		//System.out.println("FROM SERVER: " + ret);
+    		System.out.println("FROM SERVER: " + ret);
     	}catch (IOException e){
     		e.printStackTrace();
     		System.exit(-1);
@@ -82,25 +82,25 @@ public class Client{
         BufferedReader stdin = 
                 new BufferedReader(new InputStreamReader(System.in));
         
-        //System.out.println("Client Interface");
-        //System.out.println("Type \"help\" for list of supported commands");
+        System.out.println("Client Interface");
+        System.out.println("Type \"help\" for list of supported commands");
 
         while (true) {
         
             try {
                 //read the next command
-            	//System.out.println("Waiting for next command.");
+            	System.out.println("Waiting for next command.");
                 command = stdin.readLine();
             }
             catch (IOException io) {
-                //System.out.println("Unable to read from standard in");
+                System.out.println("Unable to read from standard in");
                 System.exit(1);
             }
             //remove heading and trailing white space
             command = command.trim();
             arguments = parse(command);
             
-            //System.out.println("Command: " + command);
+            System.out.println("Command: " + command);
             //decide which of the commands this was
             switch(findChoice((String) arguments.elementAt(0))) {
 
@@ -110,7 +110,7 @@ public class Client{
                 else if (arguments.size() == 2)  //command was "help <commandname>"
                     listSpecific((String) arguments.elementAt(1));
                 else  //wrong use of help command
-                    //System.out.println("Improper use of help command. Type help or help, <commandname>");
+                    System.out.println("Improper use of help command. Type help or help, <commandname>");
                 break;
                 
             case 2:  //new flight
@@ -118,10 +118,10 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Adding a new Flight using id: " + arguments.elementAt(1));
-                //System.out.println("Flight number: " + arguments.elementAt(2));
-                //System.out.println("Add Flight Seats: " + arguments.elementAt(3));
-                //System.out.println("Set Flight Price: " + arguments.elementAt(4));
+                System.out.println("Adding a new Flight using id: " + arguments.elementAt(1));
+                System.out.println("Flight number: " + arguments.elementAt(2));
+                System.out.println("Add Flight Seats: " + arguments.elementAt(3));
+                System.out.println("Set Flight Price: " + arguments.elementAt(4));
                 
                 try {
                     id = getInt(arguments.elementAt(1));
@@ -133,8 +133,8 @@ public class Client{
                     		id, flightNumber, numSeats, flightPrice));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -144,10 +144,10 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Adding a new car using id: " + arguments.elementAt(1));
-                //System.out.println("car Location: " + arguments.elementAt(2));
-                //System.out.println("Add Number of cars: " + arguments.elementAt(3));
-                //System.out.println("Set Price: " + arguments.elementAt(4));
+                System.out.println("Adding a new car using id: " + arguments.elementAt(1));
+                System.out.println("car Location: " + arguments.elementAt(2));
+                System.out.println("Add Number of cars: " + arguments.elementAt(3));
+                System.out.println("Set Price: " + arguments.elementAt(4));
                 try {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
@@ -158,8 +158,8 @@ public class Client{
                     		id, location, numCars, price));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -169,10 +169,10 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Adding a new room using id: " + arguments.elementAt(1));
-                //System.out.println("room Location: " + arguments.elementAt(2));
-                //System.out.println("Add Number of rooms: " + arguments.elementAt(3));
-                //System.out.println("Set Price: " + arguments.elementAt(4));
+                System.out.println("Adding a new room using id: " + arguments.elementAt(1));
+                System.out.println("room Location: " + arguments.elementAt(2));
+                System.out.println("Add Number of rooms: " + arguments.elementAt(3));
+                System.out.println("Set Price: " + arguments.elementAt(4));
                 try {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
@@ -183,8 +183,8 @@ public class Client{
                     		id, location, numRooms, price));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -194,14 +194,14 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
+                System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
                 try {
                     id = getInt(arguments.elementAt(1));
                     sendMessage(String.format("NewCustomer,%d",id));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -211,8 +211,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Deleting a flight using id: " + arguments.elementAt(1));
-                //System.out.println("Flight Number: " + arguments.elementAt(2));
+                System.out.println("Deleting a flight using id: " + arguments.elementAt(1));
+                System.out.println("Flight Number: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     flightNumber = getInt(arguments.elementAt(2));
@@ -221,8 +221,8 @@ public class Client{
                     		id, flightNumber));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -232,8 +232,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Deleting the cars from a particular location  using id: " + arguments.elementAt(1));
-                //System.out.println("car Location: " + arguments.elementAt(2));
+                System.out.println("Deleting the cars from a particular location  using id: " + arguments.elementAt(1));
+                System.out.println("car Location: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
@@ -242,8 +242,8 @@ public class Client{
                     		id, location));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -253,8 +253,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Deleting all rooms from a particular location  using id: " + arguments.elementAt(1));
-                //System.out.println("room Location: " + arguments.elementAt(2));
+                System.out.println("Deleting all rooms from a particular location  using id: " + arguments.elementAt(1));
+                System.out.println("room Location: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
@@ -263,8 +263,8 @@ public class Client{
                     		id, location));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -274,8 +274,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Deleting a customer from the database using id: " + arguments.elementAt(1));
-                //System.out.println("Customer id: " + arguments.elementAt(2));
+                System.out.println("Deleting a customer from the database using id: " + arguments.elementAt(1));
+                System.out.println("Customer id: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
@@ -284,8 +284,8 @@ public class Client{
                     		id, customer));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -295,8 +295,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Querying a flight using id: " + arguments.elementAt(1));
-                //System.out.println("Flight number: " + arguments.elementAt(2));
+                System.out.println("Querying a flight using id: " + arguments.elementAt(1));
+                System.out.println("Flight number: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     flightNumber = getInt(arguments.elementAt(2));
@@ -305,8 +305,8 @@ public class Client{
                     		id, flightNumber));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -316,8 +316,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Querying a car location using id: " + arguments.elementAt(1));
-                //System.out.println("car location: " + arguments.elementAt(2));
+                System.out.println("Querying a car location using id: " + arguments.elementAt(1));
+                System.out.println("car location: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
@@ -326,8 +326,8 @@ public class Client{
                     		id, location));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -337,8 +337,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Querying a room location using id: " + arguments.elementAt(1));
-                //System.out.println("room location: " + arguments.elementAt(2));
+                System.out.println("Querying a room location using id: " + arguments.elementAt(1));
+                System.out.println("room location: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
@@ -347,8 +347,8 @@ public class Client{
                     		id, location));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -358,8 +358,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Querying Customer information using id: " + arguments.elementAt(1));
-                //System.out.println("Customer id: " + arguments.elementAt(2));
+                System.out.println("Querying Customer information using id: " + arguments.elementAt(1));
+                System.out.println("Customer id: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
@@ -368,8 +368,8 @@ public class Client{
                     		id, customer));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;               
@@ -379,8 +379,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Querying a flight Price using id: " + arguments.elementAt(1));
-                //System.out.println("Flight number: " + arguments.elementAt(2));
+                System.out.println("Querying a flight Price using id: " + arguments.elementAt(1));
+                System.out.println("Flight number: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     flightNumber = getInt(arguments.elementAt(2));
@@ -389,8 +389,8 @@ public class Client{
                     		id, flightNumber));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -400,8 +400,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Querying a car price using id: " + arguments.elementAt(1));
-                //System.out.println("car location: " + arguments.elementAt(2));
+                System.out.println("Querying a car price using id: " + arguments.elementAt(1));
+                System.out.println("car location: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
@@ -410,8 +410,8 @@ public class Client{
                     		id, location));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }                
                 break;
@@ -421,8 +421,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Querying a room price using id: " + arguments.elementAt(1));
-                //System.out.println("room Location: " + arguments.elementAt(2));
+                System.out.println("Querying a room price using id: " + arguments.elementAt(1));
+                System.out.println("room Location: " + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
@@ -431,8 +431,8 @@ public class Client{
                     		id, location));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -442,9 +442,9 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Reserving a seat on a flight using id: " + arguments.elementAt(1));
-                //System.out.println("Customer id: " + arguments.elementAt(2));
-                //System.out.println("Flight number: " + arguments.elementAt(3));
+                System.out.println("Reserving a seat on a flight using id: " + arguments.elementAt(1));
+                System.out.println("Customer id: " + arguments.elementAt(2));
+                System.out.println("Flight number: " + arguments.elementAt(3));
                 try {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
@@ -454,8 +454,8 @@ public class Client{
                     		id, customer, flightNumber));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -465,9 +465,9 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Reserving a car at a location using id: " + arguments.elementAt(1));
-                //System.out.println("Customer id: " + arguments.elementAt(2));
-                //System.out.println("Location: " + arguments.elementAt(3));
+                System.out.println("Reserving a car at a location using id: " + arguments.elementAt(1));
+                System.out.println("Customer id: " + arguments.elementAt(2));
+                System.out.println("Location: " + arguments.elementAt(3));
                 try {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
@@ -477,8 +477,8 @@ public class Client{
                     		id, customer, location));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -488,9 +488,9 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Reserving a room at a location using id: " + arguments.elementAt(1));
-                //System.out.println("Customer id: " + arguments.elementAt(2));
-                //System.out.println("Location: " + arguments.elementAt(3));
+                System.out.println("Reserving a room at a location using id: " + arguments.elementAt(1));
+                System.out.println("Customer id: " + arguments.elementAt(2));
+                System.out.println("Location: " + arguments.elementAt(3));
                 try {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
@@ -500,8 +500,8 @@ public class Client{
                     		id, customer, location));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -511,13 +511,13 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
-                //System.out.println("Customer id: " + arguments.elementAt(2));
-//                for (int i = 0; i<arguments.size()-6; i++)
-                    //System.out.println("Flight number: " + arguments.elementAt(3 + i));
-                //System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
-                //System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
-                //System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
+                System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
+                System.out.println("Customer id: " + arguments.elementAt(2));
+               for (int i = 0; i<arguments.size()-6; i++)
+                    System.out.println("Flight number: " + arguments.elementAt(3 + i));
+                System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
+                System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
+                System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
                 try {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
@@ -533,10 +533,10 @@ public class Client{
                     for(int i = 0; i < flightNumbers.size(); i++){
                     	flightNumberString += getInt(flightNumbers.elementAt(i)) + ",";
                     }
-                    //System.out.println("flightNumberString: " + flightNumberString);
+                    System.out.println("flightNumberString: " + flightNumberString);
                     if(flightNumberString.length() > 1) 
                     	flightNumberString = flightNumberString.substring(0,flightNumberString.length()-1);
-                    //System.out.println("flightNumberString: " + flightNumberString);
+                    System.out.println("flightNumberString: " + flightNumberString);
                     
                     sendMessage(String.format("itinerary,%d,%d,%s,%s,%s,%s",
                     		id, customer, flightNumberString, location, 
@@ -544,8 +544,8 @@ public class Client{
                     
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -555,7 +555,7 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Quitting client.");
+                System.out.println("Quitting client.");
                 return;
                 
             case 22:  //new Customer given id
@@ -563,8 +563,8 @@ public class Client{
                     wrongNumber();
                     break;
                 }
-                //System.out.println("Adding a new Customer using id: "
-//                        + arguments.elementAt(1)  +  " and cid "  + arguments.elementAt(2));
+                System.out.println("Adding a new Customer using id: "
+                        + arguments.elementAt(1)  +  " and cid "  + arguments.elementAt(2));
                 try {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
@@ -573,8 +573,8 @@ public class Client{
                     		id, customer));
                 }
                 catch(Exception e) {
-                    //System.out.println("EXCEPTION: ");
-                    //System.out.println(e.getMessage());
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
@@ -588,9 +588,22 @@ public class Client{
             case 25:
             	sendMessage("abort");
             	break;
-                
+            case 26:
+                if (arguments.size() != 2) {
+                    wrongNumber();
+                    break;
+                }
+                    String rm;
+                    try {
+                        rm = getString(arguments.elementAt(1));
+                        sendMessage(String.format("printRM,%s",rm));
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                break;    
             default:
-                //System.out.println("The interface does not support this command.");
+                System.out.println("The interface does not support this command.");
                 break;
             }
         }
@@ -659,227 +672,234 @@ public class Client{
         	return 24;
         else if (argument.compareToIgnoreCase("abort") == 0)
         	return 25;
+        else if (argument.compareToIgnoreCase("printRM") == 0)
+          //for test only
+            return 26;
         else
             return 666;
     }
 
     public void listCommands() {
-        //System.out.println("\nWelcome to the client interface provided to test your project.");
-        //System.out.println("Commands accepted by the interface are: ");
-        //System.out.println("help");
-        //System.out.println("newflight\nnewcar\nnewroom\nnewcustomer\nnewcustomerid\ndeleteflight\ndeletecar\ndeleteroom");
-        //System.out.println("deletecustomer\nqueryflight\nquerycar\nqueryroom\nquerycustomer");
-        //System.out.println("queryflightprice\nquerycarprice\nqueryroomprice");
-        //System.out.println("reserveflight\nreservecar\nreserveroom\nitinerary");
-        //System.out.println("start\ncommit\nabort");
-        //System.out.println("quit");
-        //System.out.println("\ntype help, <commandname> for detailed info (note the use of comma).");
+        System.out.println("\nWelcome to the client interface provided to test your project.");
+        System.out.println("Commands accepted by the interface are: ");
+        System.out.println("help");
+        System.out.println("newflight\nnewcar\nnewroom\nnewcustomer\nnewcustomerid\ndeleteflight\ndeletecar\ndeleteroom");
+        System.out.println("deletecustomer\nqueryflight\nquerycar\nqueryroom\nquerycustomer");
+        System.out.println("queryflightprice\nquerycarprice\nqueryroomprice");
+        System.out.println("reserveflight\nreservecar\nreserveroom\nitinerary");
+        System.out.println("start\ncommit\nabort");
+        System.out.println("quit");
+        System.out.println("\ntype help, <commandname> for detailed info (note the use of comma).");
     }
 
 
     public void listSpecific(String command) {
-        //System.out.print("Help on: ");
+        System.out.print("Help on: ");
         switch(findChoice(command)) {
             case 1:
-            //System.out.println("Help");
-            //System.out.println("\nTyping help on the prompt gives a list of all the commands available.");
-            //System.out.println("Typing help, <commandname> gives details on how to use the particular command.");
+            System.out.println("Help");
+            System.out.println("\nTyping help on the prompt gives a list of all the commands available.");
+            System.out.println("Typing help, <commandname> gives details on how to use the particular command.");
             break;
 
             case 2:  //new flight
-            //System.out.println("Adding a new Flight.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tAdd information about a new flight.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tnewflight, <id>, <flightnumber>, <numSeats>, <flightprice>");
+            System.out.println("Adding a new Flight.");
+            System.out.println("Purpose: ");
+            System.out.println("\tAdd information about a new flight.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tnewflight, <id>, <flightnumber>, <numSeats>, <flightprice>");
             break;
             
             case 3:  //new car
-            //System.out.println("Adding a new car.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tAdd information about a new car location.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tnewcar, <id>, <location>, <numberofcars>, <pricepercar>");
+            System.out.println("Adding a new car.");
+            System.out.println("Purpose: ");
+            System.out.println("\tAdd information about a new car location.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tnewcar, <id>, <location>, <numberofcars>, <pricepercar>");
             break;
             
             case 4:  //new room
-            //System.out.println("Adding a new room.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tAdd information about a new room location.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tnewroom, <id>, <location>, <numberofrooms>, <priceperroom>");
+            System.out.println("Adding a new room.");
+            System.out.println("Purpose: ");
+            System.out.println("\tAdd information about a new room location.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tnewroom, <id>, <location>, <numberofrooms>, <priceperroom>");
             break;
             
             case 5:  //new Customer
-            //System.out.println("Adding a new Customer.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tGet the system to provide a new customer id. (same as adding a new customer)");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tnewcustomer, <id>");
+            System.out.println("Adding a new Customer.");
+            System.out.println("Purpose: ");
+            System.out.println("\tGet the system to provide a new customer id. (same as adding a new customer)");
+            System.out.println("\nUsage: ");
+            System.out.println("\tnewcustomer, <id>");
             break;
             
             
             case 6: //delete Flight
-            //System.out.println("Deleting a flight");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tDelete a flight's information.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tdeleteflight, <id>, <flightnumber>");
+            System.out.println("Deleting a flight");
+            System.out.println("Purpose: ");
+            System.out.println("\tDelete a flight's information.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tdeleteflight, <id>, <flightnumber>");
             break;
             
             case 7: //delete car
-            //System.out.println("Deleting a car");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tDelete all cars from a location.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tdeletecar, <id>, <location>, <numCars>");
+            System.out.println("Deleting a car");
+            System.out.println("Purpose: ");
+            System.out.println("\tDelete all cars from a location.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tdeletecar, <id>, <location>, <numCars>");
             break;
             
             case 8: //delete room
-            //System.out.println("Deleting a room");
-            //System.out.println("\nPurpose: ");
-            //System.out.println("\tDelete all rooms from a location.");
-            //System.out.println("Usage: ");
-            //System.out.println("\tdeleteroom, <id>, <location>, <numRooms>");
+            System.out.println("Deleting a room");
+            System.out.println("\nPurpose: ");
+            System.out.println("\tDelete all rooms from a location.");
+            System.out.println("Usage: ");
+            System.out.println("\tdeleteroom, <id>, <location>, <numRooms>");
             break;
             
             case 9: //delete Customer
-            //System.out.println("Deleting a Customer");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tRemove a customer from the database.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tdeletecustomer, <id>, <customerid>");
+            System.out.println("Deleting a Customer");
+            System.out.println("Purpose: ");
+            System.out.println("\tRemove a customer from the database.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tdeletecustomer, <id>, <customerid>");
             break;
             
             case 10: //querying a flight
-            //System.out.println("Querying flight.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tObtain Seat information about a certain flight.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tqueryflight, <id>, <flightnumber>");
+            System.out.println("Querying flight.");
+            System.out.println("Purpose: ");
+            System.out.println("\tObtain Seat information about a certain flight.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tqueryflight, <id>, <flightnumber>");
             break;
             
             case 11: //querying a car Location
-            //System.out.println("Querying a car location.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tObtain number of cars at a certain car location.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tquerycar, <id>, <location>");        
+            System.out.println("Querying a car location.");
+            System.out.println("Purpose: ");
+            System.out.println("\tObtain number of cars at a certain car location.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tquerycar, <id>, <location>");        
             break;
             
             case 12: //querying a room location
-            //System.out.println("Querying a room Location.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tObtain number of rooms at a certain room location.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tqueryroom, <id>, <location>");        
+            System.out.println("Querying a room Location.");
+            System.out.println("Purpose: ");
+            System.out.println("\tObtain number of rooms at a certain room location.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tqueryroom, <id>, <location>");        
             break;
             
             case 13: //querying Customer Information
-            //System.out.println("Querying Customer Information.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tObtain information about a customer.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tquerycustomer, <id>, <customerid>");
+            System.out.println("Querying Customer Information.");
+            System.out.println("Purpose: ");
+            System.out.println("\tObtain information about a customer.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tquerycustomer, <id>, <customerid>");
             break;               
             
             case 14: //querying a flight for price 
-            //System.out.println("Querying flight.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tObtain price information about a certain flight.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tqueryflightprice, <id>, <flightnumber>");
+            System.out.println("Querying flight.");
+            System.out.println("Purpose: ");
+            System.out.println("\tObtain price information about a certain flight.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tqueryflightprice, <id>, <flightnumber>");
             break;
             
             case 15: //querying a car Location for price
-            //System.out.println("Querying a car location.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tObtain price information about a certain car location.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tquerycarprice, <id>, <location>");        
+            System.out.println("Querying a car location.");
+            System.out.println("Purpose: ");
+            System.out.println("\tObtain price information about a certain car location.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tquerycarprice, <id>, <location>");        
             break;
             
             case 16: //querying a room location for price
-            //System.out.println("Querying a room Location.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tObtain price information about a certain room location.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tqueryroomprice, <id>, <location>");        
+            System.out.println("Querying a room Location.");
+            System.out.println("Purpose: ");
+            System.out.println("\tObtain price information about a certain room location.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tqueryroomprice, <id>, <location>");        
             break;
 
             case 17:  //reserve a flight
-            //System.out.println("Reserving a flight.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tReserve a flight for a customer.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\treserveflight, <id>, <customerid>, <flightnumber>");
+            System.out.println("Reserving a flight.");
+            System.out.println("Purpose: ");
+            System.out.println("\tReserve a flight for a customer.");
+            System.out.println("\nUsage: ");
+            System.out.println("\treserveflight, <id>, <customerid>, <flightnumber>");
             break;
             
             case 18:  //reserve a car
-            //System.out.println("Reserving a car.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tReserve a given number of cars for a customer at a particular location.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\treservecar, <id>, <customerid>, <location>, <nummberofcars>");
+            System.out.println("Reserving a car.");
+            System.out.println("Purpose: ");
+            System.out.println("\tReserve a given number of cars for a customer at a particular location.");
+            System.out.println("\nUsage: ");
+            System.out.println("\treservecar, <id>, <customerid>, <location>, <nummberofcars>");
             break;
             
             case 19:  //reserve a room
-            //System.out.println("Reserving a room.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tReserve a given number of rooms for a customer at a particular location.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\treserveroom, <id>, <customerid>, <location>, <nummberofrooms>");
+            System.out.println("Reserving a room.");
+            System.out.println("Purpose: ");
+            System.out.println("\tReserve a given number of rooms for a customer at a particular location.");
+            System.out.println("\nUsage: ");
+            System.out.println("\treserveroom, <id>, <customerid>, <location>, <nummberofrooms>");
             break;
             
             case 20:  //reserve an Itinerary
-            //System.out.println("Reserving an Itinerary.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tBook one or more flights.Also book zero or more cars/rooms at a location.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\titinerary, <id>, <customerid>, "
-//                    + "<flightnumber1>....<flightnumberN>, "
-//                    + "<LocationToBookcarsOrrooms>, <NumberOfcars>, <NumberOfroom>");
+            System.out.println("Reserving an Itinerary.");
+            System.out.println("Purpose: ");
+            System.out.println("\tBook one or more flights.Also book zero or more cars/rooms at a location.");
+            System.out.println("\nUsage: ");
+            System.out.println("\titinerary, <id>, <customerid>, "
+                    + "<flightnumber1>....<flightnumberN>, "
+                    + "<LocationToBookcarsOrrooms>, <NumberOfcars>, <NumberOfroom>");
             break;
             
 
             case 21:  //quit the client
-            //System.out.println("Quitting client.");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tExit the client application.");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tquit");
+            System.out.println("Quitting client.");
+            System.out.println("Purpose: ");
+            System.out.println("\tExit the client application.");
+            System.out.println("\nUsage: ");
+            System.out.println("\tquit");
             break;
             
             case 22:  //new customer with id
-            //System.out.println("Create new customer providing an id");
-            //System.out.println("Purpose: ");
-            //System.out.println("\tCreates a new customer with the id provided");
-            //System.out.println("\nUsage: ");
-            //System.out.println("\tnewcustomerid, <id>, <customerid>");
+            System.out.println("Create new customer providing an id");
+            System.out.println("Purpose: ");
+            System.out.println("\tCreates a new customer with the id provided");
+            System.out.println("\nUsage: ");
+            System.out.println("\tnewcustomerid, <id>, <customerid>");
             break;
 
             case 23: //start transaction
-            //System.out.println("Create new transaction");
+            System.out.println("Create new transaction");
             break;
             
             case 24: //commit transaction
-            //System.out.println("Commit transaction");
+            System.out.println("Commit transaction");
             break;
             
             case 25: //abort transaction
-            //System.out.println("Abort transaction");
+            System.out.println("Abort transaction");
+            break;
+            
+            case 26:
+            System.out.println("Print information abourt RM");
             break;
             
             default:
-            //System.out.println(command);
-            //System.out.println("The interface does not support this command.");
+            System.out.println(command);
+            System.out.println("The interface does not support this command.");
             break;
         }
     }
     
     public void wrongNumber() {
-        //System.out.println("The number of arguments provided in this command are wrong.");
-        //System.out.println("Type help, <commandname> to check usage of this command.");
+        System.out.println("The number of arguments provided in this command are wrong.");
+        System.out.println("Type help, <commandname> to check usage of this command.");
     }
 
     static public int getInt(Object temp) throws Exception {
@@ -938,7 +958,7 @@ public class Client{
             else if (arguments.size() == 2)  //command was "help <commandname>"
                 listSpecific((String) arguments.elementAt(1));
             else  //wrong use of help command
-                //System.out.println("Improper use of help command. Type help or help, <commandname>");
+                System.out.println("Improper use of help command. Type help or help, <commandname>");
             break;
             
         case 2:  //new flight
@@ -946,10 +966,10 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Adding a new Flight using id: " + arguments.elementAt(1));
-            //System.out.println("Flight number: " + arguments.elementAt(2));
-            //System.out.println("Add Flight Seats: " + arguments.elementAt(3));
-            //System.out.println("Set Flight Price: " + arguments.elementAt(4));
+            System.out.println("Adding a new Flight using id: " + arguments.elementAt(1));
+            System.out.println("Flight number: " + arguments.elementAt(2));
+            System.out.println("Add Flight Seats: " + arguments.elementAt(3));
+            System.out.println("Set Flight Price: " + arguments.elementAt(4));
             
             try {
                 id = getInt(arguments.elementAt(1));
@@ -961,8 +981,8 @@ public class Client{
                 		id, flightNumber, numSeats, flightPrice));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -972,10 +992,10 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Adding a new car using id: " + arguments.elementAt(1));
-            //System.out.println("car Location: " + arguments.elementAt(2));
-            //System.out.println("Add Number of cars: " + arguments.elementAt(3));
-            //System.out.println("Set Price: " + arguments.elementAt(4));
+            System.out.println("Adding a new car using id: " + arguments.elementAt(1));
+            System.out.println("car Location: " + arguments.elementAt(2));
+            System.out.println("Add Number of cars: " + arguments.elementAt(3));
+            System.out.println("Set Price: " + arguments.elementAt(4));
             try {
                 id = getInt(arguments.elementAt(1));
                 location = getString(arguments.elementAt(2));
@@ -986,8 +1006,8 @@ public class Client{
                 		id, location, numCars, price));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -997,10 +1017,10 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Adding a new room using id: " + arguments.elementAt(1));
-            //System.out.println("room Location: " + arguments.elementAt(2));
-            //System.out.println("Add Number of rooms: " + arguments.elementAt(3));
-            //System.out.println("Set Price: " + arguments.elementAt(4));
+            System.out.println("Adding a new room using id: " + arguments.elementAt(1));
+            System.out.println("room Location: " + arguments.elementAt(2));
+            System.out.println("Add Number of rooms: " + arguments.elementAt(3));
+            System.out.println("Set Price: " + arguments.elementAt(4));
             try {
                 id = getInt(arguments.elementAt(1));
                 location = getString(arguments.elementAt(2));
@@ -1011,8 +1031,8 @@ public class Client{
                 		id, location, numRooms, price));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1022,14 +1042,14 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
+            System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
             try {
                 id = getInt(arguments.elementAt(1));
                 sendMessage(String.format("NewCustomer,%d",id));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1039,8 +1059,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Deleting a flight using id: " + arguments.elementAt(1));
-            //System.out.println("Flight Number: " + arguments.elementAt(2));
+            System.out.println("Deleting a flight using id: " + arguments.elementAt(1));
+            System.out.println("Flight Number: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 flightNumber = getInt(arguments.elementAt(2));
@@ -1049,8 +1069,8 @@ public class Client{
                 		id, flightNumber));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1060,8 +1080,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Deleting the cars from a particular location  using id: " + arguments.elementAt(1));
-            //System.out.println("car Location: " + arguments.elementAt(2));
+            System.out.println("Deleting the cars from a particular location  using id: " + arguments.elementAt(1));
+            System.out.println("car Location: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 location = getString(arguments.elementAt(2));
@@ -1070,8 +1090,8 @@ public class Client{
                 		id, location));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1081,8 +1101,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Deleting all rooms from a particular location  using id: " + arguments.elementAt(1));
-            //System.out.println("room Location: " + arguments.elementAt(2));
+            System.out.println("Deleting all rooms from a particular location  using id: " + arguments.elementAt(1));
+            System.out.println("room Location: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 location = getString(arguments.elementAt(2));
@@ -1091,8 +1111,8 @@ public class Client{
                 		id, location));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1102,8 +1122,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Deleting a customer from the database using id: " + arguments.elementAt(1));
-            //System.out.println("Customer id: " + arguments.elementAt(2));
+            System.out.println("Deleting a customer from the database using id: " + arguments.elementAt(1));
+            System.out.println("Customer id: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 int customer = getInt(arguments.elementAt(2));
@@ -1112,8 +1132,8 @@ public class Client{
                 		id, customer));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1123,8 +1143,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Querying a flight using id: " + arguments.elementAt(1));
-            //System.out.println("Flight number: " + arguments.elementAt(2));
+            System.out.println("Querying a flight using id: " + arguments.elementAt(1));
+            System.out.println("Flight number: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 flightNumber = getInt(arguments.elementAt(2));
@@ -1133,8 +1153,8 @@ public class Client{
                 		id, flightNumber));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1144,8 +1164,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Querying a car location using id: " + arguments.elementAt(1));
-            //System.out.println("car location: " + arguments.elementAt(2));
+            System.out.println("Querying a car location using id: " + arguments.elementAt(1));
+            System.out.println("car location: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 location = getString(arguments.elementAt(2));
@@ -1154,8 +1174,8 @@ public class Client{
                 		id, location));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1165,8 +1185,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Querying a room location using id: " + arguments.elementAt(1));
-            //System.out.println("room location: " + arguments.elementAt(2));
+            System.out.println("Querying a room location using id: " + arguments.elementAt(1));
+            System.out.println("room location: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 location = getString(arguments.elementAt(2));
@@ -1175,8 +1195,8 @@ public class Client{
                 		id, location));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1186,8 +1206,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Querying Customer information using id: " + arguments.elementAt(1));
-            //System.out.println("Customer id: " + arguments.elementAt(2));
+            System.out.println("Querying Customer information using id: " + arguments.elementAt(1));
+            System.out.println("Customer id: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 int customer = getInt(arguments.elementAt(2));
@@ -1196,8 +1216,8 @@ public class Client{
                 		id, customer));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;               
@@ -1207,8 +1227,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Querying a flight Price using id: " + arguments.elementAt(1));
-            //System.out.println("Flight number: " + arguments.elementAt(2));
+            System.out.println("Querying a flight Price using id: " + arguments.elementAt(1));
+            System.out.println("Flight number: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 flightNumber = getInt(arguments.elementAt(2));
@@ -1217,8 +1237,8 @@ public class Client{
                 		id, flightNumber));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1228,8 +1248,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Querying a car price using id: " + arguments.elementAt(1));
-            //System.out.println("car location: " + arguments.elementAt(2));
+            System.out.println("Querying a car price using id: " + arguments.elementAt(1));
+            System.out.println("car location: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 location = getString(arguments.elementAt(2));
@@ -1238,8 +1258,8 @@ public class Client{
                 		id, location));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }                
             break;
@@ -1249,8 +1269,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Querying a room price using id: " + arguments.elementAt(1));
-            //System.out.println("room Location: " + arguments.elementAt(2));
+            System.out.println("Querying a room price using id: " + arguments.elementAt(1));
+            System.out.println("room Location: " + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 location = getString(arguments.elementAt(2));
@@ -1259,8 +1279,8 @@ public class Client{
                 		id, location));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1270,9 +1290,9 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Reserving a seat on a flight using id: " + arguments.elementAt(1));
-            //System.out.println("Customer id: " + arguments.elementAt(2));
-            //System.out.println("Flight number: " + arguments.elementAt(3));
+            System.out.println("Reserving a seat on a flight using id: " + arguments.elementAt(1));
+            System.out.println("Customer id: " + arguments.elementAt(2));
+            System.out.println("Flight number: " + arguments.elementAt(3));
             try {
                 id = getInt(arguments.elementAt(1));
                 int customer = getInt(arguments.elementAt(2));
@@ -1282,8 +1302,8 @@ public class Client{
                 		id, customer, flightNumber));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1293,9 +1313,9 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Reserving a car at a location using id: " + arguments.elementAt(1));
-            //System.out.println("Customer id: " + arguments.elementAt(2));
-            //System.out.println("Location: " + arguments.elementAt(3));
+            System.out.println("Reserving a car at a location using id: " + arguments.elementAt(1));
+            System.out.println("Customer id: " + arguments.elementAt(2));
+            System.out.println("Location: " + arguments.elementAt(3));
             try {
                 id = getInt(arguments.elementAt(1));
                 int customer = getInt(arguments.elementAt(2));
@@ -1305,8 +1325,8 @@ public class Client{
                 		id, customer, location));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1316,9 +1336,9 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Reserving a room at a location using id: " + arguments.elementAt(1));
-            //System.out.println("Customer id: " + arguments.elementAt(2));
-            //System.out.println("Location: " + arguments.elementAt(3));
+            System.out.println("Reserving a room at a location using id: " + arguments.elementAt(1));
+            System.out.println("Customer id: " + arguments.elementAt(2));
+            System.out.println("Location: " + arguments.elementAt(3));
             try {
                 id = getInt(arguments.elementAt(1));
                 int customer = getInt(arguments.elementAt(2));
@@ -1328,8 +1348,8 @@ public class Client{
                 		id, customer, location));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1339,13 +1359,13 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
-            //System.out.println("Customer id: " + arguments.elementAt(2));
-//            for (int i = 0; i<arguments.size()-6; i++)
-                //System.out.println("Flight number: " + arguments.elementAt(3 + i));
-            //System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
-            //System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
-            //System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
+            System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
+            System.out.println("Customer id: " + arguments.elementAt(2));
+            for (int i = 0; i<arguments.size()-6; i++)
+                System.out.println("Flight number: " + arguments.elementAt(3 + i));
+            System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
+            System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
+            System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
             try {
                 id = getInt(arguments.elementAt(1));
                 int customer = getInt(arguments.elementAt(2));
@@ -1361,10 +1381,10 @@ public class Client{
                 for(int i = 0; i < flightNumbers.size(); i++){
                 	flightNumberString += getInt(flightNumbers.elementAt(i)) + ",";
                 }
-                //System.out.println("flightNumberString: " + flightNumberString);
+                System.out.println("flightNumberString: " + flightNumberString);
                 if(flightNumberString.length() > 1) 
                 	flightNumberString = flightNumberString.substring(0,flightNumberString.length()-1);
-                //System.out.println("flightNumberString: " + flightNumberString);
+                System.out.println("flightNumberString: " + flightNumberString);
                 
                 sendMessage(String.format("itinerary,%d,%d,%s,%s,%s,%s",
                 		id, customer, flightNumberString, location, 
@@ -1372,8 +1392,8 @@ public class Client{
                 
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1383,7 +1403,7 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Quitting client.");
+            System.out.println("Quitting client.");
             return;
             
         case 22:  //new Customer given id
@@ -1391,8 +1411,8 @@ public class Client{
                 wrongNumber();
                 break;
             }
-            //System.out.println("Adding a new Customer using id: "
-//                    + arguments.elementAt(1)  +  " and cid "  + arguments.elementAt(2));
+            System.out.println("Adding a new Customer using id: "
+                    + arguments.elementAt(1)  +  " and cid "  + arguments.elementAt(2));
             try {
                 id = getInt(arguments.elementAt(1));
                 int customer = getInt(arguments.elementAt(2));
@@ -1401,8 +1421,8 @@ public class Client{
                 		id, customer));
             }
             catch(Exception e) {
-                //System.out.println("EXCEPTION: ");
-                //System.out.println(e.getMessage());
+                System.out.println("EXCEPTION: ");
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
             break;
@@ -1416,9 +1436,22 @@ public class Client{
         case 25:
         	sendMessage("abort");
         	break;
-            
+        case 26:
+            if (arguments.size() != 2) {
+                wrongNumber();
+                break;
+            }
+                String rm;
+                try {
+                    rm = getString(arguments.elementAt(1));
+                    sendMessage(String.format("printRM,%s",rm));
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            break;
         default:
-            //System.out.println("The interface does not support this command.");
+            System.out.println("The interface does not support this command.");
             break;
         }
     }

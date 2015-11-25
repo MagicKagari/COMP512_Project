@@ -8,7 +8,7 @@ import org.apache.tomcat.jni.Time;
 public class Transaction {
 
 	/* TTL constant in ms */
-	static final long TTL = 200000; //200 secs
+	static final long TTL = 60 * 1000; //60 secs
 	
 	long startTime;
 	int t_id;
