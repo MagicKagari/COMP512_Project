@@ -65,7 +65,7 @@ public class Client{
 
     public void run() {
     
-        int id;
+        int id=0;
         int flightNumber;
         int flightPrice;
         int numSeats;
@@ -114,20 +114,19 @@ public class Client{
                 break;
                 
             case 2:  //new flight
-                if (arguments.size() != 5) {
+                if (arguments.size() != 4) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Adding a new Flight using id: " + arguments.elementAt(1));
-                System.out.println("Flight number: " + arguments.elementAt(2));
-                System.out.println("Add Flight Seats: " + arguments.elementAt(3));
-                System.out.println("Set Flight Price: " + arguments.elementAt(4));
+                System.out.println("Adding a new Flight");
+                System.out.println("Flight number: " + arguments.elementAt(1));
+                System.out.println("Add Flight Seats: " + arguments.elementAt(2));
+                System.out.println("Set Flight Price: " + arguments.elementAt(3));
                 
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    flightNumber = getInt(arguments.elementAt(2));
-                    numSeats = getInt(arguments.elementAt(3));
-                    flightPrice = getInt(arguments.elementAt(4));
+                    flightNumber = getInt(arguments.elementAt(1));
+                    numSeats = getInt(arguments.elementAt(2));
+                    flightPrice = getInt(arguments.elementAt(3));
                     
                     sendMessage(String.format("NewFlight,%d,%d,%d,%d",
                     		id, flightNumber, numSeats, flightPrice));
@@ -140,19 +139,18 @@ public class Client{
                 break;
                 
             case 3:  //new car
-                if (arguments.size() != 5) {
+                if (arguments.size() != 4) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Adding a new car using id: " + arguments.elementAt(1));
-                System.out.println("car Location: " + arguments.elementAt(2));
-                System.out.println("Add Number of cars: " + arguments.elementAt(3));
-                System.out.println("Set Price: " + arguments.elementAt(4));
+                System.out.println("Adding a new car using");
+                System.out.println("car Location: " + arguments.elementAt(1));
+                System.out.println("Add Number of cars: " + arguments.elementAt(2));
+                System.out.println("Set Price: " + arguments.elementAt(3));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
-                    numCars = getInt(arguments.elementAt(3));
-                    price = getInt(arguments.elementAt(4));
+                    location = getString(arguments.elementAt(1));
+                    numCars = getInt(arguments.elementAt(2));
+                    price = getInt(arguments.elementAt(3));
 
                     sendMessage(String.format("NewCar,%d,%s,%d,%d",
                     		id, location, numCars, price));
@@ -165,19 +163,18 @@ public class Client{
                 break;
                 
             case 4:  //new room
-                if (arguments.size() != 5) {
+                if (arguments.size() != 4) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Adding a new room using id: " + arguments.elementAt(1));
-                System.out.println("room Location: " + arguments.elementAt(2));
-                System.out.println("Add Number of rooms: " + arguments.elementAt(3));
-                System.out.println("Set Price: " + arguments.elementAt(4));
+                System.out.println("Adding a new room using");
+                System.out.println("room Location: " + arguments.elementAt(1));
+                System.out.println("Add Number of rooms: " + arguments.elementAt(2));
+                System.out.println("Set Price: " + arguments.elementAt(3));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
-                    numRooms = getInt(arguments.elementAt(3));
-                    price = getInt(arguments.elementAt(4));
+                    location = getString(arguments.elementAt(1));
+                    numRooms = getInt(arguments.elementAt(2));
+                    price = getInt(arguments.elementAt(3));
 
                     sendMessage(String.format("NewRoom,%d,%s,%d,%d",
                     		id, location, numRooms, price));
@@ -190,13 +187,12 @@ public class Client{
                 break;
                 
             case 5:  //new Customer
-                if (arguments.size() != 2) {
+                if (arguments.size() != 1) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
+                System.out.println("Adding a new Customer using");
                 try {
-                    id = getInt(arguments.elementAt(1));
                     sendMessage(String.format("NewCustomer,%d",id));
                 }
                 catch(Exception e) {
@@ -207,16 +203,14 @@ public class Client{
                 break;
                 
             case 6: //delete Flight
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Deleting a flight using id: " + arguments.elementAt(1));
-                System.out.println("Flight Number: " + arguments.elementAt(2));
+                System.out.println("Deleting a flight using");
+                System.out.println("Flight Number: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    flightNumber = getInt(arguments.elementAt(2));
-
+                    flightNumber = getInt(arguments.elementAt(1));
                     sendMessage(String.format("DeleteFlight,%d,%d",
                     		id, flightNumber));
                 }
@@ -228,15 +222,14 @@ public class Client{
                 break;
                 
             case 7: //delete car
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Deleting the cars from a particular location  using id: " + arguments.elementAt(1));
-                System.out.println("car Location: " + arguments.elementAt(2));
+                System.out.println("Deleting the cars from a particular location");
+                System.out.println("car Location: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
+                    location = getString(arguments.elementAt(1));
 
                     sendMessage(String.format("DeleteCar,%d,%s",
                     		id, location));
@@ -249,16 +242,14 @@ public class Client{
                 break;
                 
             case 8: //delete room
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Deleting all rooms from a particular location  using id: " + arguments.elementAt(1));
-                System.out.println("room Location: " + arguments.elementAt(2));
+                System.out.println("Deleting all rooms from a particular location");
+                System.out.println("room Location: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
-
+                    location = getString(arguments.elementAt(1));
                     sendMessage(String.format("DeleteRoom,%d,%s",
                     		id, location));
                 }
@@ -270,16 +261,14 @@ public class Client{
                 break;
                 
             case 9: //delete Customer
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Deleting a customer from the database using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
+                System.out.println("Deleting a customer from the database");
+                System.out.println("Customer id: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
-
+                    int customer = getInt(arguments.elementAt(1));
                     sendMessage(String.format("DeleteCustomer,%d,%d",
                     		id, customer));
                 }
@@ -291,16 +280,14 @@ public class Client{
                 break;
                 
             case 10: //querying a flight
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Querying a flight using id: " + arguments.elementAt(1));
-                System.out.println("Flight number: " + arguments.elementAt(2));
+                System.out.println("Querying a flight");
+                System.out.println("Flight number: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    flightNumber = getInt(arguments.elementAt(2));
-                    
+                    flightNumber = getInt(arguments.elementAt(1));
                     sendMessage(String.format("QueryFlight,%d,%d",
                     		id, flightNumber));
                 }
@@ -312,16 +299,14 @@ public class Client{
                 break;
                 
             case 11: //querying a car Location
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Querying a car location using id: " + arguments.elementAt(1));
-                System.out.println("car location: " + arguments.elementAt(2));
+                System.out.println("Querying a car location");
+                System.out.println("car location: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
-
+                    location = getString(arguments.elementAt(1));
                     sendMessage(String.format("QueryCar,%d,%s",
                     		id, location));
                 }
@@ -333,16 +318,14 @@ public class Client{
                 break;
                 
             case 12: //querying a room location
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Querying a room location using id: " + arguments.elementAt(1));
-                System.out.println("room location: " + arguments.elementAt(2));
+                System.out.println("Querying a room location");
+                System.out.println("room location: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
-
+                    location = getString(arguments.elementAt(1));
                     sendMessage(String.format("QueryRoom,%d,%s",
                     		id, location));
                 }
@@ -354,16 +337,14 @@ public class Client{
                 break;
                 
             case 13: //querying Customer Information
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Querying Customer information using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
+                System.out.println("Querying Customer information");
+                System.out.println("Customer id: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
-
+                    int customer = getInt(arguments.elementAt(1));
                     sendMessage(String.format("QueryCustomer,%d,%d",
                     		id, customer));
                 }
@@ -375,16 +356,14 @@ public class Client{
                 break;               
                 
             case 14: //querying a flight Price
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Querying a flight Price using id: " + arguments.elementAt(1));
-                System.out.println("Flight number: " + arguments.elementAt(2));
+                System.out.println("Querying a flight Price");
+                System.out.println("Flight number: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    flightNumber = getInt(arguments.elementAt(2));
-
+                    flightNumber = getInt(arguments.elementAt(1));
                     sendMessage(String.format("QueryFlightPrice,%d,%d",
                     		id, flightNumber));
                 }
@@ -396,16 +375,14 @@ public class Client{
                 break;
                 
             case 15: //querying a car Price
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Querying a car price using id: " + arguments.elementAt(1));
-                System.out.println("car location: " + arguments.elementAt(2));
+                System.out.println("Querying a car price");
+                System.out.println("car location: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
-
+                    location = getString(arguments.elementAt(1));
                     sendMessage(String.format("QueryCarPrice,%d,%s",
                     		id, location));
                 }
@@ -417,16 +394,14 @@ public class Client{
                 break;
 
             case 16: //querying a room price
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Querying a room price using id: " + arguments.elementAt(1));
-                System.out.println("room Location: " + arguments.elementAt(2));
+                System.out.println("Querying a room price");
+                System.out.println("room Location: " + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
-
+                    location = getString(arguments.elementAt(1));
                     sendMessage(String.format("QueryRoomPrice,%d,%s",
                     		id, location));
                 }
@@ -438,17 +413,16 @@ public class Client{
                 break;
                 
             case 17:  //reserve a flight
-                if (arguments.size() != 4) {
+                if (arguments.size() != 3) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Reserving a seat on a flight using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
-                System.out.println("Flight number: " + arguments.elementAt(3));
+                System.out.println("Reserving a seat on a flight");
+                System.out.println("Customer id: " + arguments.elementAt(1));
+                System.out.println("Flight number: " + arguments.elementAt(2));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
-                    flightNumber = getInt(arguments.elementAt(3));
+                    int customer = getInt(arguments.elementAt(1));
+                    flightNumber = getInt(arguments.elementAt(2));
 
                     sendMessage(String.format("ReserveFlight,%d,%d,%d",
                     		id, customer, flightNumber));
@@ -461,17 +435,16 @@ public class Client{
                 break;
                 
             case 18:  //reserve a car
-                if (arguments.size() != 4) {
+                if (arguments.size() != 3) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Reserving a car at a location using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
-                System.out.println("Location: " + arguments.elementAt(3));
+                System.out.println("Reserving a car at a location");
+                System.out.println("Customer id: " + arguments.elementAt(1));
+                System.out.println("Location: " + arguments.elementAt(2));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
-                    location = getString(arguments.elementAt(3));
+                    int customer = getInt(arguments.elementAt(1));
+                    location = getString(arguments.elementAt(2));
                     
                     sendMessage(String.format("ReserveCar,%d,%d,%s",
                     		id, customer, location));
@@ -484,18 +457,17 @@ public class Client{
                 break;
                 
             case 19:  //reserve a room
-                if (arguments.size() != 4) {
+                if (arguments.size() != 3) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Reserving a room at a location using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
-                System.out.println("Location: " + arguments.elementAt(3));
+                System.out.println("Reserving a room at a location");
+                System.out.println("Customer id: " + arguments.elementAt(1));
+                System.out.println("Location: " + arguments.elementAt(2));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
-                    location = getString(arguments.elementAt(3));
-                    
+                    int customer = getInt(arguments.elementAt(1));
+                    location = getString(arguments.elementAt(2));
+                   
                     sendMessage(String.format("ReserveRoom,%d,%d,%s",
                     		id, customer, location));
                 }
@@ -507,23 +479,22 @@ public class Client{
                 break;
                 
             case 20:  //reserve an Itinerary
-                if (arguments.size()<7) {
+                if (arguments.size()<6) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
-               for (int i = 0; i<arguments.size()-6; i++)
-                    System.out.println("Flight number: " + arguments.elementAt(3 + i));
+                System.out.println("Reserving an Itinerary");
+                System.out.println("Customer id: " + arguments.elementAt(1));
+               for (int i = 0; i<arguments.size()-5; i++)
+                    System.out.println("Flight number: " + arguments.elementAt(2 + i));
                 System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
                 System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
                 System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
+                    int customer = getInt(arguments.elementAt(1));
                     Vector flightNumbers = new Vector();
-                    for (int i = 0; i < arguments.size()-6; i++)
-                        flightNumbers.addElement(arguments.elementAt(3 + i));
+                    for (int i = 0; i < arguments.size()-5; i++)
+                        flightNumbers.addElement(arguments.elementAt(2 + i));
                     location = getString(arguments.elementAt(arguments.size()-3));
                     car = getBoolean(arguments.elementAt(arguments.size()-2));
                     room = getBoolean(arguments.elementAt(arguments.size()-1));
@@ -559,15 +530,13 @@ public class Client{
                 return;
                 
             case 22:  //new Customer given id
-                if (arguments.size() != 3) {
+                if (arguments.size() != 2) {
                     wrongNumber();
                     break;
                 }
-                System.out.println("Adding a new Customer using id: "
-                        + arguments.elementAt(1)  +  " and cid "  + arguments.elementAt(2));
+                System.out.println("Adding a new Customer" + arguments.elementAt(1));
                 try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
+                    int customer = getInt(arguments.elementAt(1));
 
                     sendMessage(String.format("NewCustomerID,%d,%d",
                     		id, customer));
