@@ -52,29 +52,34 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         //Added for M3
         //upon start of RM, check if a Master Record existed. If yes, load it into memory. Otherwise, create a new record with current data.
         try {
-            FileInputStream fileIn = new FileInputStream("/records/MasterRecord.rm");
-            ObjectInputStream in = new ObjectInputStream(fileIn);
-            mRecord = (MasterRecord) in.readObject();
-            in.close();
-            fileIn.close();
+            String path = "./records/MasterRecord.rm";
+            File masterRecord = new File(path);
+            if(masterRecord.exists()){
+                FileInputStream fileIn = new FileInputStream(masterRecord);
+                ObjectInputStream in = new ObjectInputStream(fileIn);
+                mRecord = (MasterRecord) in.readObject();
+                in.close();
+                fileIn.close();
+                in = new ObjectInputStream(new FileInputStream(mRecord.getPointerPath()));
+                m_itemHT = (RMHashtable) in.readObject();
+                in.close();
+            }else{
+               masterRecord.getParentFile().mkdirs();
+               masterRecord.createNewFile();
+               mRecord = new MasterRecord();
+            }            
         }
         catch (FileNotFoundException f) {
             f.printStackTrace();
-            System.out.println("No master record existed, create one now.");
-            //first write data then create master record.
-            //create the repository.
-            File dest = new File("/records/temp.tmp").mkdirs();
-            dest = null;
-            
-            FileOutputStream fileOut = new FileOutputStream("/records/fileA.rm");
-            ObjectOutputStream out = new ObjectOutputStream(fileout);
-            out.writeObject(m_itemHT);
-            out.close;
-            fileOut();
-            System.out.println("New record created.");
-            
+        }catch(EOFException e){
             mRecord = new MasterRecord();
-            
+            m_itemHT = new RMHashtable();
+        }catch(IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }catch(ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         
     }
@@ -725,8 +730,9 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                                 out.writeObject(m_itemHT);
                                 out.close();
                                 fileOut.close();
-                                mRecord.setID(ID);
+                                mRecord.setID(id);
                                 mRecord.togglePointer();
+                                mRecord.updateMasterRecord();
                                 System.out.println("Record successfully.");
                             }
                             catch (IOException i) {
