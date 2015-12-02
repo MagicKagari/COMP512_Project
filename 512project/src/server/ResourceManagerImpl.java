@@ -786,6 +786,9 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                 }
              
              break;
+         case 27: // vote
+             System.out.println("Vote");
+             break;
          default:
              System.out.println("The interface does not support this command.");
              break;

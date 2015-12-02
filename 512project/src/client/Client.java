@@ -644,6 +644,9 @@ public class Client{
         else if (argument.compareToIgnoreCase("printRM") == 0)
           //for test only
             return 26;
+        else if (argument.compareToIgnoreCase("vote") == 0)
+            //for middleware and rm use only
+            return 27;
         else
             return 666;
     }
