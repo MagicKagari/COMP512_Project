@@ -9,7 +9,7 @@ public class LockManager
     public static final int WRITE = 1;
     
     private static int TABLE_SIZE = 2039;
-    private static int DEADLOCK_TIMEOUT = 10000;
+    private static int DEADLOCK_TIMEOUT = 30000;
     
     private static TPHashTable lockTable = new TPHashTable(LockManager.TABLE_SIZE);
     private static TPHashTable stampTable = new TPHashTable(LockManager.TABLE_SIZE);
@@ -64,7 +64,33 @@ public class LockManager
                             // lock conversion 
                             // *** ADD CODE HERE *** to carry out the lock conversion in the
                             // lock table
-                        	throw new DeadlockException(xid,strData);
+                            
+                            // There are two lock objs for the lock, i.e trxnObj and dataObj.
+                            // First we need to get them from lockTable.
+                            // Then set their types to WRITE.
+                            
+                            //First we need to get trxnObj and dataObj from lock table, and then change their lock type to write.
+                            
+                            Vector vect = this.lockTable.elements(dataObj);
+                            
+                            for(int i = 0; i < vect.size(); i++) {
+                                DataObj dataObj2 = (DataObj) vect.elementAt(i);
+                                if(dataObj.getXId() == dataObj2.getXId()) {
+                                    dataObj2.setLockType(TrxnObj.WRITE);
+                                }
+                            }
+                            
+                            vect = this.lockTable.elements(trxnObj);
+                            
+                            for(int j = 0; j < vect.size(); j++) {
+                                TrxnObj trxnObj2 = (TrxnObj) vect.elementAt(j);
+                                if(trxnObj.getXId() == trxnObj2.getXId()) {
+                                    trxnObj2.setLockType(TrxnObj.WRITE);
+                                }
+                            }
+                            
+                            System.out.println("Lock conversion completed.");
+                            
                         } else {
                             // a lock request that is not lock conversion
                             this.lockTable.add(trxnObj);
@@ -204,6 +230,15 @@ public class LockManager
                     // (2) transaction already had a WRITE lock
                     // Seeing the comments at the top of this function might be helpful
                     // *** ADD CODE HERE *** to take care of both these cases
+                    
+                    //if there is already a write lock, throw a redundant write lock exception.
+                    if (dataObj2.getLockType() == DataObj.WRITE) {
+                        throw new RedundantLockRequestException(dataObj.getXId(), "Redundant WRITE lock request");
+                    }
+                    //else, set bitset
+                    else {
+                        bitset.set(0);
+                    }
                 }
             } 
             else {

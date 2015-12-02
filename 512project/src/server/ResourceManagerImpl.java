@@ -6,29 +6,77 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jws.WebService;
 
 import client.Client;
+
+//Added for M3
+import java.io.*;
 
 
 @WebService(targetNamespace = "comp512", endpointInterface = "server.ws.ResourceManager")
 public class ResourceManagerImpl implements server.ws.ResourceManager {
     
 	protected RMHashtable m_itemHT = new RMHashtable();
+	Long lastModifiedTime = new Long(System.currentTimeMillis());
+	
+	//a copy of the rm table for each transaction id
+	protected ConcurrentHashMap<Integer,RMHashtable> transaction_table = 
+	        new ConcurrentHashMap<Integer,RMHashtable>();
+	protected ConcurrentHashMap<Integer,Long> lastTransactionActivityTime =
+	        new ConcurrentHashMap<Integer,Long>();
+	
     ServerSocket resourceManagerServerSocket;
     String _host;
     int _port;
     
+    //Added for M3
+    MasterRecord mRecord;
+    
     public ResourceManagerImpl(String host, int port){
     	_host = host;
     	_port = port;
+        
+        //Added for M3
+        //upon start of RM, check if a Master Record existed. If yes, load it into memory. Otherwise, create a new record with current data.
+        try {
+            FileInputStream fileIn = new FileInputStream("/records/MasterRecord.rm");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            mRecord = (MasterRecord) in.readObject();
+            in.close();
+            fileIn.close();
+        }
+        catch (FileNotFoundException f) {
+            f.printStackTrace();
+            System.out.println("No master record existed, create one now.");
+            //first write data then create master record.
+            //create the repository.
+            File dest = new File("/records/temp.tmp").mkdirs();
+            dest = null;
+            
+            FileOutputStream fileOut = new FileOutputStream("/records/fileA.rm");
+            ObjectOutputStream out = new ObjectOutputStream(fileout);
+            out.writeObject(m_itemHT);
+            out.close;
+            fileOut();
+            System.out.println("New record created.");
+            
+            mRecord = new MasterRecord();
+            
+        }
+        
     }
     
     public void initSocket(){
@@ -72,9 +120,13 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 				middlewareSocket.getOutputStream());  
 
 		while(true){
-			String middlewareCommand = inFromClient.readLine();     
-			System.out.println("Received: " + middlewareCommand);            
-			outToClient.writeBytes(decodeCommand(middlewareCommand) + "\n");
+			synchronized (inFromClient) {
+				synchronized (outToClient) {
+					String middlewareCommand = inFromClient.readLine();     
+					System.out.println("Received: " + middlewareCommand);            
+					outToClient.writeBytes(decodeCommand(middlewareCommand) + "\n");
+				}
+			}
 		}
     	
     }
@@ -104,6 +156,18 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
          command = command.trim();
          arguments = Client.parse(command);
          
+         if(arguments.size() == 0){
+        	 return "Empty Command";
+         }else{
+        	 for(int i=1; i<arguments.size();i++){
+        		 String s = (String)arguments.get(i);
+        		 try{
+        			 Integer.parseInt(s);
+        		 }catch(NumberFormatException e){
+        			 return "Wrong command format";
+        		 }
+        	 }
+         }
          System.out.println("Command: " + command);
          //decide which of the commands this was
          switch(Client.findChoice((String) arguments.elementAt(0))) {
@@ -124,6 +188,8 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              
              try {
                  id = Client.getInt(arguments.elementAt(1));
+                 
+                 
                  flightNumber = Client.getInt(arguments.elementAt(2));
                  numSeats = Client.getInt(arguments.elementAt(3));
                  flightPrice = Client.getInt(arguments.elementAt(4));
@@ -621,6 +687,99 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              }
              break;
              
+         case 23://start
+                try {
+                    id = Client.getInt(arguments.elementAt(1));
+                    transaction_table.put(new Integer(id), deepClone());
+                    lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+                    ret = "Operation success.";
+                } catch (Exception e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+             break;
+         case 24://commit
+             
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 RMHashtable t = transaction_table.get(new Integer(id));
+                 Long lastTime = lastTransactionActivityTime.get(new Integer(id));
+                 synchronized (lastModifiedTime) {
+                    synchronized (m_itemHT) {
+                        if(lastTime < lastModifiedTime){
+                            //TODO abort the part on other RMs
+                            ret = "Operation failed. New version of data available.";
+                            transaction_table.remove(new Integer(id));
+                            lastTransactionActivityTime.remove(new Integer(id));           
+                        }else{
+                            m_itemHT = t;
+                            
+                            //Added for M3
+                            try {
+                                String destFile = mRecord.getPathA();
+                                if(mRecord.getPointer().equals("A")) {
+                                    destFile = mRecord.getPathB();
+                                }
+                                FileOutputStream  fileOut = new FileOutputStream(destFile);
+                                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                                out.writeObject(m_itemHT);
+                                out.close();
+                                fileOut.close();
+                                mRecord.setID(ID);
+                                mRecord.togglePointer();
+                                System.out.println("Record successfully.");
+                            }
+                            catch (IOException i) {
+                                i.printStackTrace();
+                            }
+                            
+                            
+                            transaction_table.remove(new Integer(id));
+                            lastTransactionActivityTime.remove(new Integer(id)); 
+                            lastModifiedTime = new Long(System.currentTimeMillis());
+                        }
+                    }
+                 }
+                
+             } catch (Exception e1) {
+                 // TODO Auto-generated catch block
+                 e1.printStackTrace();
+             }
+             break;
+             
+         case 25://abort
+             try {
+                 id = Client.getInt(arguments.elementAt(1));
+                 boolean isFound = false;
+                 if(transaction_table.keySet().contains(new Integer(id))){
+                     transaction_table.remove(new Integer(id));
+                     lastTransactionActivityTime.remove(new Integer(id));
+                     
+                     //Added for M3
+                     //No need to read master record into memory.
+                     
+                     ret = "Operation success.";
+                 }else{
+                     ret = "Operation failed.";
+                 }
+             } catch (Exception e1) {
+                 // TODO Auto-generated catch block
+                 e1.printStackTrace();
+             }
+             
+             break;
+             
+         case 26: //print
+             System.out.println("Printing RM");
+                try {
+                    ObjectOutputStream o = new ObjectOutputStream(System.out);
+                    o.writeObject(m_itemHT);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+             
+             break;
          default:
              System.out.println("The interface does not support this command.");
              break;
@@ -633,23 +792,43 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     
     // Read a data item.
     private RMItem readData(int id, String key) {
+        RMHashtable t = transaction_table.get(new Integer(id));
+        synchronized(t){
+            return (RMItem) t.get(key);
+        }
+        /*
         synchronized(m_itemHT) {
             return (RMItem) m_itemHT.get(key);
         }
+        */
     }
 
     // Write a data item.
     private void writeData(int id, String key, RMItem value) {
+        RMHashtable t = transaction_table.get(new Integer(id));
+        synchronized(t){
+            t.put(key, value);
+            lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+        }
+        /*
         synchronized(m_itemHT) {
             m_itemHT.put(key, value);
         }
+        */
     }
     
     // Remove the item out of storage.
     protected RMItem removeData(int id, String key) {
+        RMHashtable t = transaction_table.get(new Integer(id));
+        synchronized(t){
+            lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+            return (RMItem)t.remove(key);
+        }
+        /*
         synchronized(m_itemHT) {
             return (RMItem) m_itemHT.remove(key);
         }
+        */
     }
     
     
@@ -941,17 +1120,17 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // This method makes testing easier.
     @Override
     public boolean newCustomerId(int id, int customerId) {
-        Trace.info("INFO: RM::newCustomer(" + id + ", " + customerId + ") called.");
+        Trace.info("INFO: RM::newCustomerId(" + id + ", " + customerId + ") called.");
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
         if (cust == null) {
             cust = new Customer(customerId);
             writeData(id, cust.getKey(), cust);
-            Trace.info("INFO: RM::newCustomer(" + id + ", " + customerId + ") OK.");
+            Trace.info("INFO: RM::newCustomerId(" + id + ", " + customerId + ") OK.");
             return true;
         } else {
-            Trace.info("INFO: RM::newCustomer(" + id + ", " + 
+            Trace.info("INFO: RM::newCustomeIdr(" + id + ", " + 
                     customerId + ") failed: customer already exists.");
-            return false;
+            return true;
         }
     }
 
@@ -963,7 +1142,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         if (cust == null) {
             Trace.warn("RM::deleteCustomer(" + id + ", " 
                     + customerId + ") failed: customer doesn't exist.");
-            return false;
+            return true;
         } else {            
             // Increase the reserved numbers of all reservable items that 
             // the customer reserved. 
@@ -1050,4 +1229,20 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         return false;
     }
 
+    private RMHashtable deepClone(){
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(m_itemHT);
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            return (RMHashtable) ois.readObject();
+        } catch (IOException e) {
+            return null;
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+    
 }
