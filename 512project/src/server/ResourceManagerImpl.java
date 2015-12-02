@@ -22,6 +22,9 @@ import javax.jws.WebService;
 
 import client.Client;
 
+//Added for M3
+import java.io.*;
+
 
 @WebService(targetNamespace = "comp512", endpointInterface = "server.ws.ResourceManager")
 public class ResourceManagerImpl implements server.ws.ResourceManager {
@@ -39,9 +42,41 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     String _host;
     int _port;
     
+    //Added for M3
+    MasterRecord mRecord;
+    
     public ResourceManagerImpl(String host, int port){
     	_host = host;
     	_port = port;
+        
+        //Added for M3
+        //upon start of RM, check if a Master Record existed. If yes, load it into memory. Otherwise, create a new record with current data.
+        try {
+            FileInputStream fileIn = new FileInputStream("/records/MasterRecord.rm");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            mRecord = (MasterRecord) in.readObject();
+            in.close();
+            fileIn.close();
+        }
+        catch (FileNotFoundException f) {
+            f.printStackTrace();
+            System.out.println("No master record existed, create one now.");
+            //first write data then create master record.
+            //create the repository.
+            File dest = new File("/records/temp.tmp").mkdirs();
+            dest = null;
+            
+            FileOutputStream fileOut = new FileOutputStream("/records/fileA.rm");
+            ObjectOutputStream out = new ObjectOutputStream(fileout);
+            out.writeObject(m_itemHT);
+            out.close;
+            fileOut();
+            System.out.println("New record created.");
+            
+            mRecord = new MasterRecord();
+            
+        }
+        
     }
     
     public void initSocket(){
@@ -678,6 +713,27 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                             lastTransactionActivityTime.remove(new Integer(id));           
                         }else{
                             m_itemHT = t;
+                            
+                            //Added for M3
+                            try {
+                                String destFile = mRecord.getPathA();
+                                if(mRecord.getPointer().equals("A")) {
+                                    destFile = mRecord.getPathB();
+                                }
+                                FileOutputStream  fileOut = new FileOutputStream(destFile);
+                                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                                out.writeObject(m_itemHT);
+                                out.close();
+                                fileOut.close();
+                                mRecord.setID(ID);
+                                mRecord.togglePointer();
+                                System.out.println("Record successfully.");
+                            }
+                            catch (IOException i) {
+                                i.printStackTrace();
+                            }
+                            
+                            
                             transaction_table.remove(new Integer(id));
                             lastTransactionActivityTime.remove(new Integer(id)); 
                             lastModifiedTime = new Long(System.currentTimeMillis());
@@ -698,6 +754,10 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  if(transaction_table.keySet().contains(new Integer(id))){
                      transaction_table.remove(new Integer(id));
                      lastTransactionActivityTime.remove(new Integer(id));
+                     
+                     //Added for M3
+                     //No need to read master record into memory.
+                     
                      ret = "Operation success.";
                  }else{
                      ret = "Operation failed.";
