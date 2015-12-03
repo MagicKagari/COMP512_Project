@@ -180,18 +180,34 @@ public class ClientHandler implements Callable{
                 //M3 crash
 
                 else if(clientCmds[0].equals("setCrashCaseMiddleware")) {
-                    if(clientCmds[2] != null) {
-                        try {
-                            middleware.crashType = MiddlewareCrashType.values()[Integer.parseInt(clientCmds[2])];
-                        }
-                        catch(NumberFormatException n) {
-                            n.printStackTrace();
+                    if(clientCmds.size() == 3) {
+                        if(clientCmds[2] != null) {
+                            try {
+                                middleware.crashType = MiddlewareCrashType.values()[Integer.parseInt(clientCmds[2])];
+                            }
+                            catch(NumberFormatException n) {
+                                n.printStackTrace();
+                            }
                         }
                     }
+                    else {
+                        System.out.println("Wrong command format.");
+                    }
+                    continue;
                 }
-
-				//decode which RM to send to
-				RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
+                
+                //decode which RM to send to
+                if(clientCmds[0].equals("setCrashCaseRM")) {
+                    if(clientCmds.size() == 4) {
+                        RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[2]);
+                    }
+                    else {
+                        System.out.println("Wrong command format.");
+                    }
+                }
+                else {
+                    RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
+                }
 				//if command is relate to customer or iternary reserve
 				if(desiredRM == null){
 					String firstWord = clientCmds[0];
