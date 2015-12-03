@@ -123,7 +123,6 @@ public class ClientHandler implements Callable{
 			    }
 			    //crash command for crashing a component
 			    if(clientCmds[0].equals("crash")){
-			        
 			        RMmeta rm_to_crash;
 			        Socket s;
 			        switch(clientCmds[2]){
@@ -136,7 +135,7 @@ public class ClientHandler implements Callable{
 			                    BufferedReader inFromServer = new BufferedReader(
 		                                new InputStreamReader(s.getInputStream()));
 		                        DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
-		                        outToServer.writeBytes("crash");
+		                        outToServer.writeBytes("crash\n");
 		                        inFromServer.readLine();
                             }
 			                break;
@@ -147,7 +146,7 @@ public class ClientHandler implements Callable{
                                 BufferedReader inFromServer = new BufferedReader(
                                         new InputStreamReader(s.getInputStream()));
                                 DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
-                                outToServer.writeBytes("crash");
+                                outToServer.writeBytes("crash\n");
                                 inFromServer.readLine();
                             }
 			                break;
@@ -158,7 +157,7 @@ public class ClientHandler implements Callable{
                                 BufferedReader inFromServer = new BufferedReader(
                                         new InputStreamReader(s.getInputStream()));
                                 DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
-                                outToServer.writeBytes("crash");
+                                outToServer.writeBytes("crash\n");
                                 inFromServer.readLine();
                             }
 			                break;
