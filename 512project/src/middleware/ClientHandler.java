@@ -27,8 +27,6 @@ public class ClientHandler implements Callable{
 	TransactionManager transactionManager;
 	LockManager lockManager;
 
-    //M3 crash
-    private int crashCase = 0;
 
 	public ClientHandler(Socket socket, Middleware mw){
 		middleware = mw;
@@ -181,10 +179,10 @@ public class ClientHandler implements Callable{
 
                 //M3 crash
 
-                else if(clientCmds[0].equals("setCrashCaseServer")) {
-                    if(clientCmds[1] != null) {
+                else if(clientCmds[0].equals("setCrashCaseMiddleware")) {
+                    if(clientCmds[2] != null) {
                         try {
-                            crashCase = Integer.parseInt(clientCmds[1]);
+                            middleware.crashType = MiddlewareCrashType.values()[Integer.parseInt(clientCmds[2])];
                         }
                         catch(NumberFormatException n) {
                             n.printStackTrace();
