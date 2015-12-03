@@ -121,6 +121,53 @@ public class ClientHandler implements Callable{
                     }
 			        continue;
 			    }
+			    //crash command for crashing a component
+			    if(clientCmds[0].equals("crash")){
+			        
+			        RMmeta rm_to_crash;
+			        Socket s;
+			        switch(clientCmds[2]){
+			            case "middleware":
+			                break;
+			            case "car":
+			                rm_to_crash = middleware.getResourceManagerOfType("car");
+			                s = rm_to_crash.getSocket();
+			                synchronized (s) {
+			                    BufferedReader inFromServer = new BufferedReader(
+		                                new InputStreamReader(s.getInputStream()));
+		                        DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+		                        outToServer.writeBytes("crash");
+		                        inFromServer.readLine();
+                            }
+			                break;
+			            case "room":
+			                rm_to_crash = middleware.getResourceManagerOfType("room");
+                            s = rm_to_crash.getSocket();
+                            synchronized (s) {
+                                BufferedReader inFromServer = new BufferedReader(
+                                        new InputStreamReader(s.getInputStream()));
+                                DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                                outToServer.writeBytes("crash");
+                                inFromServer.readLine();
+                            }
+			                break;
+			            case "flight":
+			                rm_to_crash = middleware.getResourceManagerOfType("flight");
+                            s = rm_to_crash.getSocket();
+                            synchronized (s) {
+                                BufferedReader inFromServer = new BufferedReader(
+                                        new InputStreamReader(s.getInputStream()));
+                                DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                                outToServer.writeBytes("crash");
+                                inFromServer.readLine();
+                            }
+			                break;
+			            default:
+			                break;
+			        }
+			        continue;
+			    }
+			    
 				//decode which RM to send to
 				RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
 				//if command is relate to customer or iternary reserve

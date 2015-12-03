@@ -61,10 +61,10 @@ public class TransactionManager {
 		}
 		System.out.println("COMMIT: "+t.toString());
 		t.addCommand("commit","commit");
-		//TODO: ask for each rm to vote
 		List<RMmeta> rms = middleware.resourceManagers;
 		synchronized (rms) {
 		    boolean result = true;
+		    //ask each rm to vote
             for(RMmeta rm : rms){
                 Socket s = rm.getSocket();
                 synchronized (s) {
@@ -72,10 +72,6 @@ public class TransactionManager {
                         BufferedReader inFromServer = new BufferedReader(
                                 new InputStreamReader(s.getInputStream()));
                         DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
-                        /*
-                        outToServer.writeBytes("commit,"+t.getId() + '\n');      
-                        System.out.println(inFromServer.readLine());
-                        */
                         outToServer.writeBytes("vote,"+t.getId()+'\n');
                         String ret = inFromServer.readLine();
                         if(ret.compareToIgnoreCase("no")==0) result = false;
@@ -85,7 +81,7 @@ public class TransactionManager {
                 }
             }
             
-            //if any rm vote no, then abort
+            //if all vote yes, then commit
             if(result){
                 for(RMmeta rm : rms){
                     Socket s = rm.getSocket();
@@ -96,13 +92,15 @@ public class TransactionManager {
                             DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
                             outToServer.writeBytes("commit,"+t.getId() + '\n');      
                             System.out.println(inFromServer.readLine());
+                            
                        }catch(Exception e){
                             e.printStackTrace();
                         }
                     }
                 }
+                t.addCommand("commit","commit");
+            //if any vote no, then abort    
             }else{
-                this.middleware.lockManager.UnlockAll(t.getId());
                 System.out.println("ABORTING: "+t.toString());
                 for(RMmeta rm : rms){
                     Socket s = rm.getSocket();
@@ -118,6 +116,9 @@ public class TransactionManager {
                         }
                     }
                 }
+                this.middleware.lockManager.UnlockAll(t.getId());
+                t.addCommand("abort","abort");
+                
             }
 		}
 		transactionTable.remove(t);
@@ -131,7 +132,6 @@ public class TransactionManager {
 					+ t.toString());
 			return false;
 		}
-		this.middleware.lockManager.UnlockAll(t.getId());
 		System.out.println("ABORTING: "+t.toString());
 		
 		List<RMmeta> rms = middleware.resourceManagers;
@@ -152,52 +152,9 @@ public class TransactionManager {
                 }
             }
         }
-		/*
-		//rollback commands
-		for(int i=0; i<t.entireCommands.size(); i++){
-			String command = t.entireCommands.get(i);
-			RMmeta.RMtype type = transactionTable.get(t).get(i);
-			String offset;
-			if(command.contains("New")){
-				offset = command.replace("New","Delete");
-				String offsets[] = offset.split(",");
-				offset = String.format("%s,%s,%s",offsets[0], offsets[1], offsets[2]);
-				RMmeta rm = middleware.getResourceManagerOfType(type);
-				Socket handler = rm.getSocket();
-				synchronized (handler) {
-					try{
-						BufferedReader inFromServer = new BufferedReader(
-				    			new InputStreamReader(handler.getInputStream()));
-				   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
-				   		outToServer.writeBytes(offset + '\n'); 		
-				   		String ret = inFromServer.readLine();
-				   	}catch(Exception e){
-				   		e.printStackTrace();
-				   	}
-				} 
-				continue;
-			}
-			
-			if(command.contains("Delete")){
-				offset = command.replace("Delete","New")+",1,1";
-				RMmeta rm = middleware.getResourceManagerOfType(type);
-				Socket handler = rm.getSocket();
-				synchronized (handler) {
-					try{
-						BufferedReader inFromServer = new BufferedReader(
-				    			new InputStreamReader(handler.getInputStream()));
-				   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
-				   		outToServer.writeBytes(offset + '\n'); 		
-				   		String ret = inFromServer.readLine();
-				   	}catch(Exception e){
-				   		e.printStackTrace();
-				   	}
-				}
-				continue;
-			}
-		}
-		*/
-		t.addCommand("abort","abort");
+		
+		this.middleware.lockManager.UnlockAll(t.getId());
+        t.addCommand("abort","abort");
 		transactionTable.remove(t);
 		return true;
 	}

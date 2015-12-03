@@ -37,6 +37,8 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 	        new ConcurrentHashMap<Integer,RMHashtable>();
 	protected ConcurrentHashMap<Integer,Long> lastTransactionActivityTime =
 	        new ConcurrentHashMap<Integer,Long>();
+	protected ConcurrentHashMap<Integer, Boolean> isTransactionModified =
+	        new ConcurrentHashMap<Integer, Boolean>();
 	
     ServerSocket resourceManagerServerSocket;
     String _host;
@@ -710,6 +712,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                     id = Client.getInt(arguments.elementAt(1));
                     transaction_table.put(new Integer(id), deepClone());
                     lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+                    isTransactionModified.put(new Integer(id), new Boolean(false));
                     ret = "Operation success.";
                 } catch (Exception e1) {
                     // TODO Auto-generated catch block
@@ -721,14 +724,19 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              try {
                  id = Client.getInt(arguments.elementAt(1));
                  RMHashtable t = transaction_table.get(new Integer(id));
+                 if(t == null){
+                     ret = "No such transaction to commit.";
+                     break;
+                 }
                  Long lastTime = lastTransactionActivityTime.get(new Integer(id));
                  synchronized (lastModifiedTime) {
                     synchronized (m_itemHT) {
-                        if(lastTime < lastModifiedTime){
+                        if(lastTime < lastModifiedTime && isTransactionModified.get(new Integer(id))){
                             //TODO abort the part on other RMs
                             ret = "Operation failed. New version of data available.";
                             transaction_table.remove(new Integer(id));
-                            lastTransactionActivityTime.remove(new Integer(id));           
+                            lastTransactionActivityTime.remove(new Integer(id));
+                            isTransactionModified.remove(new Integer(id));
                         }else{
                             m_itemHT = t;
                             
@@ -752,9 +760,10 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                                 i.printStackTrace();
                             }
                             
-                            
+                            ret = "Commit success.";
                             transaction_table.remove(new Integer(id));
-                            lastTransactionActivityTime.remove(new Integer(id)); 
+                            lastTransactionActivityTime.remove(new Integer(id));
+                            isTransactionModified.remove(new Integer(id));
                             lastModifiedTime = new Long(System.currentTimeMillis());
                         }
                     }
@@ -773,7 +782,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  if(transaction_table.keySet().contains(new Integer(id))){
                      transaction_table.remove(new Integer(id));
                      lastTransactionActivityTime.remove(new Integer(id));
-                     
+                     isTransactionModified.remove(new Integer(id));
                      //Added for M3
                      //No need to read master record into memory.
                      
@@ -804,16 +813,31 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                 try {
                     //TODO:vote checking
                     id = Client.getInt(arguments.elementAt(1));
-                    if(transaction_table.keySet().contains(new Integer(id))){
+                    RMHashtable t = transaction_table.get(new Integer(id));
+                    if(t == null){
                         ret = "yes";
-                    }else{
-                        ret = "no";
+                        break;
+                    }
+                    Long lastTime = lastTransactionActivityTime.get(new Integer(id));
+                    synchronized (lastModifiedTime) {
+                        synchronized (m_itemHT) {
+                            if(lastTime < lastModifiedTime && isTransactionModified.get(new Integer(id))){
+                                //newer version is available so vote no
+                                ret = "no";
+                            }else{
+                                ret = "yes";
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
              
+             break;
+         case 28: //crash
+             System.out.println("Crash!");
+             System.exit(0);
              break;
          default:
              System.out.println("The interface does not support this command.");
@@ -844,6 +868,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         synchronized(t){
             t.put(key, value);
             lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+            isTransactionModified.put(new Integer(id), new Boolean(true));
         }
         /*
         synchronized(m_itemHT) {
@@ -857,6 +882,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         RMHashtable t = transaction_table.get(new Integer(id));
         synchronized(t){
             lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+            isTransactionModified.put(new Integer(id), new Boolean(true));
             return (RMItem)t.remove(key);
         }
         /*
@@ -881,6 +907,11 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         } else {
             if (curObj.getReserved() == 0) {
                 removeData(id, curObj.getKey());
+                RMHashtable t = transaction_table.get(new Integer(id));
+                synchronized(t){
+                    lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+                    isTransactionModified.put(new Integer(id), new Boolean(true));
+                }
                 Trace.info("RM::deleteItem(" + id + ", " + key + ") OK.");
                 return true;
             }
@@ -947,6 +978,11 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             // Decrease the number of available items in the storage.
             item.setCount(item.getCount() - 1);
             item.setReserved(item.getReserved() + 1);
+            RMHashtable t = transaction_table.get(new Integer(id));
+            synchronized(t){
+                lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+                isTransactionModified.put(new Integer(id), new Boolean(true));
+            }
             
             Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", " 
                     + key + ", " + location + ") OK.");

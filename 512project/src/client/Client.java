@@ -571,6 +571,20 @@ public class Client{
                         e.printStackTrace();
                     }
                 break;    
+            case 28:
+                //crash,COMPONENT
+                if(arguments.size()!=2){
+                    wrongNumber();
+                    break;
+                }
+                    try {
+                        String component = getString(arguments.elementAt(1));
+                        sendMessage(String.format("crash,%d,%s",id, component));
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                break;
             default:
                 System.out.println("The interface does not support this command.");
                 break;
@@ -647,6 +661,9 @@ public class Client{
         else if (argument.compareToIgnoreCase("vote") == 0)
             //for middleware and rm use only
             return 27;
+        else if (argument.compareToIgnoreCase("crash") == 0)
+            //crash a compoment, crash,COMPONENT_NAME
+            return 28;
         else
             return 666;
     }
