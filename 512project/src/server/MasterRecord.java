@@ -13,10 +13,13 @@ public class MasterRecord implements Serializable {
     private String fileA = "./records/fileA.rm";
     private String fileB = "./records/fileB.rm";
     String RMtype;
+    String name;
     
-    
-    MasterRecord() {
+    MasterRecord(String name) {
+        this.name = name;
         this.isAMaster = true;
+        fileA = "./records/"+name+"fileA.rm";
+        fileB = "./records/"+name+"fileB.rm";
         checkRMfiles();
     }
 

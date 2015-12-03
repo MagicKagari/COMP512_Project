@@ -61,9 +61,10 @@ public class TransactionManager {
 		}
 		System.out.println("COMMIT: "+t.toString());
 		t.addCommand("commit","commit");
-		
+		//TODO: ask for each rm to vote
 		List<RMmeta> rms = middleware.resourceManagers;
 		synchronized (rms) {
+		    boolean result = true;
             for(RMmeta rm : rms){
                 Socket s = rm.getSocket();
                 synchronized (s) {
@@ -71,10 +72,50 @@ public class TransactionManager {
                         BufferedReader inFromServer = new BufferedReader(
                                 new InputStreamReader(s.getInputStream()));
                         DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                        /*
                         outToServer.writeBytes("commit,"+t.getId() + '\n');      
                         System.out.println(inFromServer.readLine());
+                        */
+                        outToServer.writeBytes("vote,"+t.getId()+'\n');
+                        String ret = inFromServer.readLine();
+                        if(ret.compareToIgnoreCase("no")==0) result = false;
                     }catch(Exception e){
                         e.printStackTrace();
+                    }
+                }
+            }
+            
+            //if any rm vote no, then abort
+            if(result){
+                for(RMmeta rm : rms){
+                    Socket s = rm.getSocket();
+                    synchronized (s) {
+                        try{
+                            BufferedReader inFromServer = new BufferedReader(
+                                    new InputStreamReader(s.getInputStream()));
+                            DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                            outToServer.writeBytes("commit,"+t.getId() + '\n');      
+                            System.out.println(inFromServer.readLine());
+                       }catch(Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }else{
+                this.middleware.lockManager.UnlockAll(t.getId());
+                System.out.println("ABORTING: "+t.toString());
+                for(RMmeta rm : rms){
+                    Socket s = rm.getSocket();
+                    synchronized (s) {
+                        try{
+                            BufferedReader inFromServer = new BufferedReader(
+                                    new InputStreamReader(s.getInputStream()));
+                            DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                            outToServer.writeBytes("abort,"+t.getId() + '\n');      
+                            System.out.println(inFromServer.readLine());
+                        }catch(Exception e){
+                            e.printStackTrace();
+                        }
                     }
                 }
             }

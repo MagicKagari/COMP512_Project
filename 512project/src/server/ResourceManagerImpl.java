@@ -41,18 +41,19 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     ServerSocket resourceManagerServerSocket;
     String _host;
     int _port;
+    String _name;
     
     //Added for M3
     MasterRecord mRecord;
     
-    public ResourceManagerImpl(String host, int port){
+    public ResourceManagerImpl(String host, int port, String name){
     	_host = host;
     	_port = port;
-        
+        _name = name;
         //Added for M3
         //upon start of RM, check if a Master Record existed. If yes, load it into memory. Otherwise, create a new record with current data.
         try {
-            String path = "./records/MasterRecord.rm";
+            String path = "./records/"+_name+"MasterRecord.rm";
             File masterRecord = new File(path);
             if(masterRecord.exists()){
                 FileInputStream fileIn = new FileInputStream(masterRecord);
@@ -66,13 +67,13 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             }else{
                masterRecord.getParentFile().mkdirs();
                masterRecord.createNewFile();
-               mRecord = new MasterRecord();
+               mRecord = new MasterRecord(_name);
             }            
         }
         catch (FileNotFoundException f) {
             f.printStackTrace();
         }catch(EOFException e){
-            mRecord = new MasterRecord();
+            mRecord = new MasterRecord(_name);
             m_itemHT = new RMHashtable();
         }catch(IOException e) {
             // TODO Auto-generated catch block
@@ -105,7 +106,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     	    int servicePort = Integer.parseInt(args[2]);
     	       
     	    System.out.println("Starting RM on " + serviceHost + " " + servicePort);
-    		ResourceManagerImpl rManagerImpl = new ResourceManagerImpl(serviceHost, servicePort);
+    		ResourceManagerImpl rManagerImpl = new ResourceManagerImpl(serviceHost, servicePort, serviceName);
     		rManagerImpl.initSocket();
     		while(true){
     			rManagerImpl.run();
@@ -788,6 +789,19 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              break;
          case 27: // vote
              System.out.println("Vote");
+                try {
+                    //TODO:vote checking
+                    id = Client.getInt(arguments.elementAt(1));
+                    if(transaction_table.keySet().contains(new Integer(id))){
+                        ret = "yes";
+                    }else{
+                        ret = "no";
+                    }
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+             
              break;
          default:
              System.out.println("The interface does not support this command.");
