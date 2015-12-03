@@ -28,26 +28,27 @@ import java.io.*;
 
 @WebService(targetNamespace = "comp512", endpointInterface = "server.ws.ResourceManager")
 public class ResourceManagerImpl implements server.ws.ResourceManager {
-    
+
 	protected RMHashtable m_itemHT = new RMHashtable();
 	Long lastModifiedTime = new Long(System.currentTimeMillis());
-	
+
 	//a copy of the rm table for each transaction id
-	protected ConcurrentHashMap<Integer,RMHashtable> transaction_table = 
+	protected ConcurrentHashMap<Integer,RMHashtable> transaction_table =
 	        new ConcurrentHashMap<Integer,RMHashtable>();
 	protected ConcurrentHashMap<Integer,Long> lastTransactionActivityTime =
 	        new ConcurrentHashMap<Integer,Long>();
 	protected ConcurrentHashMap<Integer, Boolean> isTransactionModified =
 	        new ConcurrentHashMap<Integer, Boolean>();
-	
+
     ServerSocket resourceManagerServerSocket;
     String _host;
     int _port;
     String _name;
-    
+
     //Added for M3
     MasterRecord mRecord;
-    
+    private int crashCase = 0;
+
     public ResourceManagerImpl(String host, int port, String name){
     	_host = host;
     	_port = port;
@@ -70,7 +71,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                masterRecord.getParentFile().mkdirs();
                masterRecord.createNewFile();
                mRecord = new MasterRecord(_name);
-            }            
+            }
         }
         catch (FileNotFoundException f) {
             f.printStackTrace();
@@ -84,9 +85,9 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
     }
-    
+
     public void initSocket(){
     	try {
 			resourceManagerServerSocket = new ServerSocket(_port);
@@ -95,18 +96,18 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 			e.printStackTrace();
 		}
     }
-    
+
     public static void main(String[] args) {
     	try {
     		if (args.length != 3) {
     			System.out.println("Usage: MyServer <service-name> <service-host> <service-port>");
     	        System.exit(-1);
     	    }
-    	            
+
     	    String serviceName = args[0];
     	    String serviceHost = args[1];
     	    int servicePort = Integer.parseInt(args[2]);
-    	       
+
     	    System.out.println("Starting RM on " + serviceHost + " " + servicePort);
     		ResourceManagerImpl rManagerImpl = new ResourceManagerImpl(serviceHost, servicePort, serviceName);
     		rManagerImpl.initSocket();
@@ -116,49 +117,49 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     	}catch(Exception e) {
             e.printStackTrace();
         }
-    	
+
 	}
-    
+
     public void run() throws IOException{
     	Socket middlewareSocket = resourceManagerServerSocket.accept();
     	System.out.println("RM: Connection come in.");
     	BufferedReader inFromClient = new BufferedReader(
-				new InputStreamReader(middlewareSocket.getInputStream())); 
+				new InputStreamReader(middlewareSocket.getInputStream()));
 		DataOutputStream outToClient = new DataOutputStream(
-				middlewareSocket.getOutputStream());  
+				middlewareSocket.getOutputStream());
 
 		while(true){
 			synchronized (inFromClient) {
 				synchronized (outToClient) {
-					String middlewareCommand = inFromClient.readLine();     
-					System.out.println("Received: " + middlewareCommand);      
+					String middlewareCommand = inFromClient.readLine();
+					System.out.println("Received: " + middlewareCommand);
 					//TODO: Encouter this due to middleware crashed
 					if(middlewareCommand==null){
 					    System.out.println("Detect middleware crashed.\n");
 					    middlewareSocket = resourceManagerServerSocket.accept();
 					    System.out.println("RM: Connection come in.");
 				        inFromClient = new BufferedReader(
-				                new InputStreamReader(middlewareSocket.getInputStream())); 
+				                new InputStreamReader(middlewareSocket.getInputStream()));
 				        outToClient = new DataOutputStream(
 				                middlewareSocket.getOutputStream());
 					    continue;
 					}
-					
+
 					outToClient.writeBytes(decodeCommand(middlewareCommand) + "\n");
 				}
 			}
 		}
-    	
+
     }
-    
+
     /*
      * decode the command and execute it
      * same parsing style as Client class
      */
     public String decodeCommand(String command){
-    	
+
     	String ret = "";
-    	
+
     	 int id;
          int flightNumber;
          int flightPrice;
@@ -175,7 +176,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
          //remove heading and trailing white space
          command = command.trim();
          arguments = Client.parse(command);
-         
+
          if(arguments.size() == 0){
         	 return "Empty Command";
          }else{
@@ -195,7 +196,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
          case 1: //help section
              System.out.println("No such thing.");
              break;
-             
+
          case 2:  //new flight
              if (arguments.size() != 5) {
                  ret = "Wrong argument number.";
@@ -205,21 +206,21 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              System.out.println("Flight number: " + arguments.elementAt(2));
              System.out.println("Add Flight Seats: " + arguments.elementAt(3));
              System.out.println("Set Flight Price: " + arguments.elementAt(4));
-             
+
              try {
                  id = Client.getInt(arguments.elementAt(1));
-                 
-                 
+
+
                  flightNumber = Client.getInt(arguments.elementAt(2));
                  numSeats = Client.getInt(arguments.elementAt(3));
                  flightPrice = Client.getInt(arguments.elementAt(4));
-                 
+
                  if(addFlight(id, flightNumber, numSeats, flightPrice)){
                 	 ret = "Operation success.";
                  }else{
                 	 ret = "Operation failed.";
                  }
-                 
+
              }
              catch(Exception e) {
                  System.out.println("EXCEPTION: ");
@@ -227,7 +228,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 3:  //new car
         	 if (arguments.size() != 5) {
         		 ret = "Wrong argument number.";
@@ -255,7 +256,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 4:  //new room
              if (arguments.size() != 5) {
                  ret = "Wrong argument number.";
@@ -277,13 +278,13 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                 	 ret = "Operation failed.";
                  }
              }
-             catch(Exception e) {	
+             catch(Exception e) {
                  System.out.println("EXCEPTION: ");
                  System.out.println(e.getMessage());
                  e.printStackTrace();
              }
              break;
-             
+
          case 5:  //new Customer
              if (arguments.size() != 2) {
             	 ret = "Wrong argument number.";
@@ -301,7 +302,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 6: //delete Flight
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
@@ -325,7 +326,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 7: //delete car
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
@@ -342,7 +343,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  }else{
                 	 ret = "Operation failed.";
                  }
-              
+
              }
              catch(Exception e) {
                  System.out.println("EXCEPTION: ");
@@ -350,7 +351,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 8: //delete room
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
@@ -374,11 +375,11 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 9: //delete Customer
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
-                 
+
                  break;
              }
              System.out.println("Deleting a customer from the database using id: " + arguments.elementAt(1));
@@ -399,11 +400,11 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 10: //querying a flight
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
-                 
+
                  break;
              }
              System.out.println("Querying a flight using id: " + arguments.elementAt(1));
@@ -411,7 +412,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              try {
                  id = Client.getInt(arguments.elementAt(1));
                  flightNumber = Client.getInt(arguments.elementAt(2));
-                 
+
                  int seats = queryFlight(id, flightNumber);
                  ret = String.format("%d seats available.", seats);
              }
@@ -421,11 +422,11 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 11: //querying a car Location
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
-                 
+
                  break;
              }
              System.out.println("Querying a car location using id: " + arguments.elementAt(1));
@@ -443,7 +444,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 12: //querying a room location
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
@@ -464,7 +465,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 13: //querying Customer Information
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
@@ -477,15 +478,15 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  int customer = Client.getInt(arguments.elementAt(2));
 
                  ret = "Customer info : " + queryCustomerInfo(id, customer);
-                 
+
              }
              catch(Exception e) {
                  System.out.println("EXCEPTION: ");
                  System.out.println(e.getMessage());
                  e.printStackTrace();
              }
-             break;               
-             
+             break;
+
          case 14: //querying a flight Price
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
@@ -505,7 +506,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 15: //querying a car Price
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
@@ -523,7 +524,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  System.out.println("EXCEPTION: ");
                  System.out.println(e.getMessage());
                  e.printStackTrace();
-             }                
+             }
              break;
 
          case 16: //querying a room price
@@ -545,7 +546,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 17:  //reserve a flight
              if (arguments.size() != 4) {
             	 ret = "Wrong argument number.";
@@ -571,7 +572,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 18:  //reserve a car
              if (arguments.size() != 4) {
             	 ret = "Wrong argument number.";
@@ -584,13 +585,13 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  id = Client.getInt(arguments.elementAt(1));
                  int customer = Client.getInt(arguments.elementAt(2));
                  location = Client.getString(arguments.elementAt(3));
-                 
+
                  if (reserveCar(id, customer, location)){
                 	 ret = "Operation success.";
                  }else{
                 	 ret = "Operation failed.";
                  }
-                 
+
              }
              catch(Exception e) {
                  System.out.println("EXCEPTION: ");
@@ -598,7 +599,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 19:  //reserve a room
              if (arguments.size() != 4) {
             	 ret = "Wrong argument number.";
@@ -611,7 +612,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  id = Client.getInt(arguments.elementAt(1));
                  int customer = Client.getInt(arguments.elementAt(2));
                  location = Client.getString(arguments.elementAt(3));
-                 
+
                  if (reserveRoom(id, customer, location)){
                 	 ret = "Operation success.";
                  }else{
@@ -624,7 +625,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 20:  //reserve an Itinerary
         	 /*
              if (arguments.size()<7) {
@@ -639,7 +640,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
              System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
              try {
-            	 
+
                  id = Client.getInt(arguments.elementAt(1));
                  int customer = Client.getInt(arguments.elementAt(2));
                  Vector flightNumbers = new Vector();
@@ -648,12 +649,12 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  location = Client.getString(arguments.elementAt(arguments.size()-3));
                  car = Client.getBoolean(arguments.elementAt(arguments.size()-2));
                  room = Client.getBoolean(arguments.elementAt(arguments.size()-1));
-                 
+
                  //go through the iternary
                  boolean result = false;
                  for(int i = 0; i < flightNumbers.size(); i++){
                  	flightNumber = Client.getInt(flightNumbers.elementAt(i));
-                 	result = reserveFlight(id, customer, flightNumber);                            
+                 	result = reserveFlight(id, customer, flightNumber);
                  }
                  if(car){
                 	 result = reserveCar(id, customer, location);
@@ -661,13 +662,13 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  if(room){
                 	 result = reserveRoom(id, customer, location);
                  }
-                 
+
                  if(result){
                 	 ret = "Operation success.";
                  }else{
                 	 ret = "Operation failed.";
                  }
-                 
+
              }
              catch(Exception e) {
                  System.out.println("EXCEPTION: ");
@@ -677,11 +678,11 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              */
         	 ret = "Wrong command.";
              break;
-                         
+
          case 21: //quit the client
         	 ret = "Wrong command.";
         	 break;
-             
+
          case 22:  //new Customer given id
              if (arguments.size() != 3) {
             	 ret = "Wrong argument number.";
@@ -693,7 +694,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  id = Client.getInt(arguments.elementAt(1));
                  int customer = Client.getInt(arguments.elementAt(2));
 
-                 
+
                  if (newCustomerId(id, customer)){
                 	 ret = "Operation success.";
                  }else{
@@ -706,7 +707,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  e.printStackTrace();
              }
              break;
-             
+
          case 23://start
                 try {
                     id = Client.getInt(arguments.elementAt(1));
@@ -720,7 +721,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                 }
              break;
          case 24://commit
-             
+
              try {
                  id = Client.getInt(arguments.elementAt(1));
                  RMHashtable t = transaction_table.get(new Integer(id));
@@ -739,7 +740,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                             isTransactionModified.remove(new Integer(id));
                         }else{
                             m_itemHT = t;
-                            
+
                             //Added for M3
                             try {
                                 String destFile = mRecord.getPathA();
@@ -759,7 +760,6 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                             catch (IOException i) {
                                 i.printStackTrace();
                             }
-                            
                             ret = "Commit success.";
                             transaction_table.remove(new Integer(id));
                             lastTransactionActivityTime.remove(new Integer(id));
@@ -768,13 +768,13 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                         }
                     }
                  }
-                
+
              } catch (Exception e1) {
                  // TODO Auto-generated catch block
                  e1.printStackTrace();
              }
              break;
-             
+
          case 25://abort
              try {
                  id = Client.getInt(arguments.elementAt(1));
@@ -785,7 +785,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                      isTransactionModified.remove(new Integer(id));
                      //Added for M3
                      //No need to read master record into memory.
-                     
+
                      ret = "Operation success.";
                  }else{
                      ret = "Operation failed.";
@@ -794,9 +794,9 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  // TODO Auto-generated catch block
                  e1.printStackTrace();
              }
-             
+
              break;
-             
+
          case 26: //print
              System.out.println("Printing RM");
                 try {
@@ -806,10 +806,15 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-             
+
              break;
          case 27: // vote
              System.out.println("Vote");
+
+             if(crashCase == 1){
+               selfDestruct();
+             }
+
                 try {
                     //TODO:vote checking
                     id = Client.getInt(arguments.elementAt(1));
@@ -833,22 +838,32 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-             
+
              break;
-         case 28: //crash
-             System.out.println("Crash!");
-             System.exit(0);
-             break;
+          case 28: //set crash case
+            if (arguments.size() != 3) {
+              ret = "Wrong argument number.";
+              break;
+            }
+            try {
+              if(arguments.elementAt(2).equals(serviceName)){
+                crashCase = argumens.elementAt(1);
+              }
+            }
+            catch (Exception e) {
+              e.printStackTrace();
+            }
+            break;
          default:
              System.out.println("The interface does not support this command.");
              break;
          }//end switch
 		return ret;
      }//end function
-    
-    
+
+
     // Basic operations on RMItem //
-    
+
     // Read a data item.
     private RMItem readData(int id, String key) {
         RMHashtable t = transaction_table.get(new Integer(id));
@@ -876,7 +891,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         }
         */
     }
-    
+
     // Remove the item out of storage.
     protected RMItem removeData(int id, String key) {
         RMHashtable t = transaction_table.get(new Integer(id));
@@ -891,17 +906,17 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         }
         */
     }
-    
-    
+
+
     // Basic operations on ReservableItem //
-    
+
     // Delete the entire item.
     protected boolean deleteItem(int id, String key) {
         Trace.info("RM::deleteItem(" + id + ", " + key + ") called.");
         ReservableItem curObj = (ReservableItem) readData(id, key);
         // Check if there is such an item in the storage.
         if (curObj == null) {
-            Trace.warn("RM::deleteItem(" + id + ", " + key + ") failed: " 
+            Trace.warn("RM::deleteItem(" + id + ", " + key + ") failed: "
                     + " item doesn't exist.");
             return false;
         } else {
@@ -922,24 +937,24 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             }
         }
     }
-    
+
     // Query the number of available seats/rooms/cars.
     protected int queryNum(int id, String key) {
         Trace.info("RM::queryNum(" + id + ", " + key + ") called.");
         ReservableItem curObj = (ReservableItem) readData(id, key);
-        int value = 0;  
+        int value = 0;
         if (curObj != null) {
             value = curObj.getCount();
         }
         Trace.info("RM::queryNum(" + id + ", " + key + ") OK: " + value);
         return value;
-    }    
-    
+    }
+
     // Query the price of an item.
     protected int queryPrice(int id, String key) {
         Trace.info("RM::queryCarsPrice(" + id + ", " + key + ") called.");
         ReservableItem curObj = (ReservableItem) readData(id, key);
-        int value = 0; 
+        int value = 0;
         if (curObj != null) {
             value = curObj.getPrice();
         }
@@ -948,33 +963,33 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     }
 
     // Reserve an item.
-    protected boolean reserveItem(int id, int customerId, 
+    protected boolean reserveItem(int id, int customerId,
                                   String key, String location) {
-        Trace.info("RM::reserveItem(" + id + ", " + customerId + ", " 
+        Trace.info("RM::reserveItem(" + id + ", " + customerId + ", "
                 + key + ", " + location + ") called.");
         // Read customer object if it exists (and read lock it).
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
         if (cust == null) {
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", " 
+            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
                    + key + ", " + location + ") failed: customer doesn't exist.");
             return false;
-        } 
-        
+        }
+
         // Check if the item is available.
         ReservableItem item = (ReservableItem) readData(id, key);
         if (item == null) {
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", " 
+            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
                     + key + ", " + location + ") failed: item doesn't exist.");
             return false;
         } else if (item.getCount() == 0) {
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", " 
+            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
                     + key + ", " + location + ") failed: no more items.");
             return false;
         } else {
             // Do reservation.
             cust.reserve(key, location, item.getPrice());
             writeData(id, cust.getKey(), cust);
-            
+
             // Decrease the number of available items in the storage.
             item.setCount(item.getCount() - 1);
             item.setReserved(item.getReserved() + 1);
@@ -983,30 +998,30 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                 lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
                 isTransactionModified.put(new Integer(id), new Boolean(true));
             }
-            
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", " 
+
+            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
                     + key + ", " + location + ") OK.");
             return true;
         }
     }
-    
-    
+
+
     // Flight operations //
-    
+
     // Create a new flight, or add seats to existing flight.
-    // Note: if flightPrice <= 0 and the flight already exists, it maintains 
+    // Note: if flightPrice <= 0 and the flight already exists, it maintains
     // its current price.
     @Override
-    public boolean addFlight(int id, int flightNumber, 
+    public boolean addFlight(int id, int flightNumber,
                              int numSeats, int flightPrice) {
-        Trace.info("RM::addFlight(" + id + ", " + flightNumber 
+        Trace.info("RM::addFlight(" + id + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ") called.");
         Flight curObj = (Flight) readData(id, Flight.getKey(flightNumber));
         if (curObj == null) {
             // Doesn't exist; add it.
             Flight newObj = new Flight(flightNumber, numSeats, flightPrice);
             writeData(id, newObj.getKey(), newObj);
-            Trace.info("RM::addFlight(" + id + ", " + flightNumber 
+            Trace.info("RM::addFlight(" + id + ", " + flightNumber
                     + ", $" + flightPrice + ", " + numSeats + ") OK.");
         } else {
             // Add seats to existing flight and update the price.
@@ -1015,7 +1030,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                 curObj.setPrice(flightPrice);
             }
             writeData(id, curObj.getKey(), curObj);
-            Trace.info("RM::addFlight(" + id + ", " + flightNumber 
+            Trace.info("RM::addFlight(" + id + ", " + flightNumber
                     + ", $" + flightPrice + ", " + numSeats + ") OK: "
                     + "seats = " + curObj.getCount() + ", price = $" + flightPrice);
         }
@@ -1039,36 +1054,36 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     }
 
     /*
-    // Returns the number of reservations for this flight. 
+    // Returns the number of reservations for this flight.
     public int queryFlightReservations(int id, int flightNumber) {
-        Trace.info("RM::queryFlightReservations(" + id 
+        Trace.info("RM::queryFlightReservations(" + id
                 + ", #" + flightNumber + ") called.");
-        RMInteger numReservations = (RMInteger) readData(id, 
+        RMInteger numReservations = (RMInteger) readData(id,
                 Flight.getNumReservationsKey(flightNumber));
         if (numReservations == null) {
             numReservations = new RMInteger(0);
        }
-        Trace.info("RM::queryFlightReservations(" + id + 
+        Trace.info("RM::queryFlightReservations(" + id +
                 ", #" + flightNumber + ") = " + numReservations);
         return numReservations.getValue();
     }
     */
-    
+
     /*
-    // Frees flight reservation record. Flight reservation records help us 
-    // make sure we don't delete a flight if one or more customers are 
+    // Frees flight reservation record. Flight reservation records help us
+    // make sure we don't delete a flight if one or more customers are
     // holding reservations.
     public boolean freeFlightReservation(int id, int flightNumber) {
-        Trace.info("RM::freeFlightReservations(" + id + ", " 
+        Trace.info("RM::freeFlightReservations(" + id + ", "
                 + flightNumber + ") called.");
-        RMInteger numReservations = (RMInteger) readData(id, 
+        RMInteger numReservations = (RMInteger) readData(id,
                 Flight.getNumReservationsKey(flightNumber));
         if (numReservations != null) {
             numReservations = new RMInteger(
                     Math.max(0, numReservations.getValue() - 1));
         }
         writeData(id, Flight.getNumReservationsKey(flightNumber), numReservations);
-        Trace.info("RM::freeFlightReservations(" + id + ", " 
+        Trace.info("RM::freeFlightReservations(" + id + ", "
                 + flightNumber + ") OK: reservations = " + numReservations);
         return true;
     }
@@ -1078,18 +1093,18 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Car operations //
 
     // Create a new car location or add cars to an existing location.
-    // Note: if price <= 0 and the car location already exists, it maintains 
+    // Note: if price <= 0 and the car location already exists, it maintains
     // its current price.
     @Override
     public boolean addCars(int id, String location, int numCars, int carPrice) {
-        Trace.info("RM::addCars(" + id + ", " + location + ", " 
+        Trace.info("RM::addCars(" + id + ", " + location + ", "
                 + numCars + ", $" + carPrice + ") called.");
         Car curObj = (Car) readData(id, Car.getKey(location));
         if (curObj == null) {
             // Doesn't exist; add it.
             Car newObj = new Car(location, numCars, carPrice);
             writeData(id, newObj.getKey(), newObj);
-            Trace.info("RM::addCars(" + id + ", " + location + ", " 
+            Trace.info("RM::addCars(" + id + ", " + location + ", "
                     + numCars + ", $" + carPrice + ") OK.");
         } else {
             // Add count to existing object and update price.
@@ -1098,8 +1113,8 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                 curObj.setPrice(carPrice);
             }
             writeData(id, curObj.getKey(), curObj);
-            Trace.info("RM::addCars(" + id + ", " + location + ", " 
-                    + numCars + ", $" + carPrice + ") OK: " 
+            Trace.info("RM::addCars(" + id + ", " + location + ", "
+                    + numCars + ", $" + carPrice + ") OK: "
                     + "cars = " + curObj.getCount() + ", price = $" + carPrice);
         }
         return(true);
@@ -1122,23 +1137,23 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     public int queryCarsPrice(int id, String location) {
         return queryPrice(id, Car.getKey(location));
     }
-    
+
 
     // Room operations //
 
     // Create a new room location or add rooms to an existing location.
-    // Note: if price <= 0 and the room location already exists, it maintains 
+    // Note: if price <= 0 and the room location already exists, it maintains
     // its current price.
     @Override
     public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
-        Trace.info("RM::addRooms(" + id + ", " + location + ", " 
+        Trace.info("RM::addRooms(" + id + ", " + location + ", "
                 + numRooms + ", $" + roomPrice + ") called.");
         Room curObj = (Room) readData(id, Room.getKey(location));
         if (curObj == null) {
             // Doesn't exist; add it.
             Room newObj = new Room(location, numRooms, roomPrice);
             writeData(id, newObj.getKey(), newObj);
-            Trace.info("RM::addRooms(" + id + ", " + location + ", " 
+            Trace.info("RM::addRooms(" + id + ", " + location + ", "
                     + numRooms + ", $" + roomPrice + ") OK.");
         } else {
             // Add count to existing object and update price.
@@ -1147,8 +1162,8 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                 curObj.setPrice(roomPrice);
             }
             writeData(id, curObj.getKey(), curObj);
-            Trace.info("RM::addRooms(" + id + ", " + location + ", " 
-                    + numRooms + ", $" + roomPrice + ") OK: " 
+            Trace.info("RM::addRooms(" + id + ", " + location + ", "
+                    + numRooms + ", $" + roomPrice + ") OK: "
                     + "rooms = " + curObj.getCount() + ", price = $" + roomPrice);
         }
         return(true);
@@ -1165,7 +1180,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     public int queryRooms(int id, String location) {
         return queryNum(id, Room.getKey(location));
     }
-    
+
     // Returns room price at this location.
     @Override
     public int queryRoomsPrice(int id, String location) {
@@ -1199,37 +1214,37 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             Trace.info("INFO: RM::newCustomerId(" + id + ", " + customerId + ") OK.");
             return true;
         } else {
-            Trace.info("INFO: RM::newCustomeIdr(" + id + ", " + 
+            Trace.info("INFO: RM::newCustomeIdr(" + id + ", " +
                     customerId + ") failed: customer already exists.");
             return true;
         }
     }
 
-    // Delete customer from the database. 
+    // Delete customer from the database.
     @Override
     public boolean deleteCustomer(int id, int customerId) {
         Trace.info("RM::deleteCustomer(" + id + ", " + customerId + ") called.");
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
         if (cust == null) {
-            Trace.warn("RM::deleteCustomer(" + id + ", " 
+            Trace.warn("RM::deleteCustomer(" + id + ", "
                     + customerId + ") failed: customer doesn't exist.");
             return true;
-        } else {            
-            // Increase the reserved numbers of all reservable items that 
-            // the customer reserved. 
+        } else {
+            // Increase the reserved numbers of all reservable items that
+            // the customer reserved.
             RMHashtable reservationHT = cust.getReservations();
-            for (Enumeration e = reservationHT.keys(); e.hasMoreElements();) {        
+            for (Enumeration e = reservationHT.keys(); e.hasMoreElements();) {
                 String reservedKey = (String) (e.nextElement());
                 ReservedItem reservedItem = cust.getReservedItem(reservedKey);
-                Trace.info("RM::deleteCustomer(" + id + ", " + customerId + "): " 
+                Trace.info("RM::deleteCustomer(" + id + ", " + customerId + "): "
                         + "deleting " + reservedItem.getCount() + " reservations "
                         + "for item " + reservedItem.getKey());
-                ReservableItem item = 
+                ReservableItem item =
                         (ReservableItem) readData(id, reservedItem.getKey());
                 item.setReserved(item.getReserved() - reservedItem.getCount());
                 item.setCount(item.getCount() + reservedItem.getCount());
                 Trace.info("RM::deleteCustomer(" + id + ", " + customerId + "): "
-                        + reservedItem.getKey() + " reserved/available = " 
+                        + reservedItem.getKey() + " reserved/available = "
                         + item.getReserved() + "/" + item.getCount());
             }
             // Remove the customer from the storage.
@@ -1239,15 +1254,15 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         }
     }
 
-    // Return data structure containing customer reservation info. 
-    // Returns null if the customer doesn't exist. 
+    // Return data structure containing customer reservation info.
+    // Returns null if the customer doesn't exist.
     // Returns empty RMHashtable if customer exists but has no reservations.
     public RMHashtable getCustomerReservations(int id, int customerId) {
-        Trace.info("RM::getCustomerReservations(" + id + ", " 
+        Trace.info("RM::getCustomerReservations(" + id + ", "
                 + customerId + ") called.");
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
         if (cust == null) {
-            Trace.info("RM::getCustomerReservations(" + id + ", " 
+            Trace.info("RM::getCustomerReservations(" + id + ", "
                     + customerId + ") failed: customer doesn't exist.");
             return null;
         } else {
@@ -1261,7 +1276,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         Trace.info("RM::queryCustomerInfo(" + id + ", " + customerId + ") called.");
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
         if (cust == null) {
-            Trace.warn("RM::queryCustomerInfo(" + id + ", " 
+            Trace.warn("RM::queryCustomerInfo(" + id + ", "
                     + customerId + ") failed: customer doesn't exist.");
             // Returning an empty bill means that the customer doesn't exist.
             return "";
@@ -1273,25 +1288,25 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         }
     }
 
-    // Add flight reservation to this customer.  
+    // Add flight reservation to this customer.
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber) {
-        return reserveItem(id, customerId, 
+        return reserveItem(id, customerId,
                 Flight.getKey(flightNumber), String.valueOf(flightNumber));
     }
 
-    // Add car reservation to this customer. 
+    // Add car reservation to this customer.
     @Override
     public boolean reserveCar(int id, int customerId, String location) {
         return reserveItem(id, customerId, Car.getKey(location), location);
     }
 
-    // Add room reservation to this customer. 
+    // Add room reservation to this customer.
     @Override
     public boolean reserveRoom(int id, int customerId, String location) {
         return reserveItem(id, customerId, Room.getKey(location), location);
     }
-    
+
 
     // Reserve an itinerary.
     @Override
@@ -1315,5 +1330,9 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             return null;
         }
     }
-    
+
+    private void selfDestruct() {
+      system.exit(1);
+    }
+
 }

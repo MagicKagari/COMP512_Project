@@ -26,6 +26,9 @@ public class ClientHandler implements Callable{
 	TransactionManager transactionManager;
 	LockManager lockManager;
 
+    //M3 crash
+    private int crashCase = 0;
+
 	public ClientHandler(Socket socket, Middleware mw){
 		middleware = mw;
 		clientSocket = socket;
@@ -37,20 +40,20 @@ public class ClientHandler implements Callable{
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-		
+		}
+
 	}
-	
+
 	@Override
 	public Object call() throws Exception {
 		while(true){
-			//read in command send from client  
-			String clientCommand = inFromClient.readLine();  
+			//read in command send from client
+			String clientCommand = inFromClient.readLine();
 			if(clientCommand == null){
 				break;
 			}
-			
-			System.out.println("Received: " + clientCommand);            
+
+			System.out.println("Received: " + clientCommand);
 			//start a transaction
 			if(clientCommand.equals("start")){
 				transaction = transactionManager.start();
@@ -59,7 +62,7 @@ public class ClientHandler implements Callable{
                 }
 				continue;
 			}
-			
+
 			//inform customer to start transaction first
 			if(transaction == null){
 				transaction = transactionManager.start();
@@ -68,7 +71,7 @@ public class ClientHandler implements Callable{
                 }
 				continue;
 			}
-			
+
 			if(clientCommand.equals("commit")){
 				boolean ret = transactionManager.commit(transaction);
 				synchronized (outToClient) {
@@ -82,7 +85,7 @@ public class ClientHandler implements Callable{
 				transaction = null;
 				continue;
 			}
-			
+
 			if(clientCommand.equals("abort")){
 				boolean ret = transactionManager.abort(transaction);
 				synchronized (outToClient) {
@@ -96,7 +99,7 @@ public class ClientHandler implements Callable{
 				transaction = null;
 				continue;
 			}
-			
+
 			//switch second argument id to transaction id
 			String clientCmds[] = clientCommand.split(",");
 			clientCmds[1] = String.valueOf(transaction.getId());
@@ -104,7 +107,7 @@ public class ClientHandler implements Callable{
 			for(int i=1; i<clientCmds.length;i++){
 			    clientCommand += ','+clientCmds[i];
 			}
-			
+
 			if(clientCmds.length > 0){
 			    //test command for print rm
 			    if(clientCmds[0].equals("printRM")){
@@ -121,6 +124,7 @@ public class ClientHandler implements Callable{
                     }
 			        continue;
 			    }
+/*
 			    //crash command for crashing a component
 			    if(clientCmds[0].equals("crash")){
 			        RMmeta rm_to_crash;
@@ -166,7 +170,21 @@ public class ClientHandler implements Callable{
 			        }
 			        continue;
 			    }
-			    
+*/
+
+                //M3 crash
+
+                else if(clientCmds[0].equals("setCrashCaseServer")) {
+                    if(clientCmds[1] != null) {
+                        try {
+                            crashCase = Integer.parseInt(clientCmds[1]);
+                        }
+                        catch(NumberFormatException n) {
+                            n.printStackTrace();
+                        }
+                    }
+                }
+
 				//decode which RM to send to
 				RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
 				//if command is relate to customer or iternary reserve
@@ -190,7 +208,7 @@ public class ClientHandler implements Callable{
 							   		outToServer.writeBytes(String.format("newCustomerID,%d,%s", transaction.getId(), customerId) + "\n");
 							   		ret += inFromServer.readLine();
 								}
-							}				
+							}
 							outToClient.writeBytes(String.format("Customer %d id : %s", transaction.getId(), customerId) + "\n");
 							continue;
 						}else{
@@ -204,13 +222,13 @@ public class ClientHandler implements Callable{
 							   		outToServer.writeBytes(clientCommand + "\n");
 							   		ret += inFromServer.readLine();
 								}
-								
+
 							}
 							outToClient.writeBytes(ret + "\n");
 							continue;
 						}
 					}
-					
+
 					//special case where we reserve itinerary
 					if(firstWord.compareToIgnoreCase("itinerary") == 0 ){
 						 int id;
@@ -230,7 +248,7 @@ public class ClientHandler implements Callable{
 //			             System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
 //			             System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
 			             try {
-			            	 
+
 			                 id = Client.getInt(arguments.elementAt(1));
 			                 int customer = Client.getInt(arguments.elementAt(2));
 			                 Vector flightNumbers = new Vector();
@@ -239,7 +257,7 @@ public class ClientHandler implements Callable{
 			                 location = Client.getString(arguments.elementAt(arguments.size()-3));
 			                 car = Client.getBoolean(arguments.elementAt(arguments.size()-2));
 			                 room = Client.getBoolean(arguments.elementAt(arguments.size()-1));
-			                 
+
 			                 //go through the itinernary
 			                 String command = "";
 			                 String ret = "";
@@ -257,17 +275,17 @@ public class ClientHandler implements Callable{
 						                 	 flightNumber = Client.getInt(flightNumbers.elementAt(i));
 						                 	 command = String.format("ReserveFlight,%d,%d,%d", id, customer, flightNumber);
 						                 	 outToServer.writeBytes(command + '\n');
-						                 	 ret += inFromServer.readLine();                      
+						                 	 ret += inFromServer.readLine();
 						                 }
 								}
-				             	 
+
 			                 }
-			                 
+
 			                 if(car){
 			                	 rm = middleware.getResourceManagerOfType("Car");
 			                	 if(rm != null){
 			                		 System.out.println("Handle car itinerary");
-				                	 
+
 			                		 handler = rm.getSocket();
 			                		 synchronized (handler) {
 			                			 BufferedReader inFromServer = new BufferedReader(
@@ -277,15 +295,15 @@ public class ClientHandler implements Callable{
 									   	 outToServer.writeBytes(command + '\n');
 									   	 ret += inFromServer.readLine();
 									}
-			                		 
+
 			                	 }
 			                 }
-			                 
+
 			                 if(room){
 			                	 rm = middleware.getResourceManagerOfType("Room");
 			                	 if(rm != null){
 			                		 System.out.println("Handle room itinerary");
-				                	 
+
 			                		 handler = rm.getSocket();
 			                		 synchronized (handler) {
 			                			 BufferedReader inFromServer = new BufferedReader(
@@ -295,7 +313,7 @@ public class ClientHandler implements Callable{
 									   	 outToServer.writeBytes(command + '\n');
 									   	 ret += inFromServer.readLine();
 									}
-			                		 
+
 			                	 }
 			                 }
 			                 outToClient.writeBytes(ret + '\n');
@@ -314,7 +332,7 @@ public class ClientHandler implements Callable{
 					}
 					continue;
 				}//end of special case handling
-				
+
 				//otherwise is the general client command
 				//record operation in transaction
 				System.out.println("Add operation to transaction: "+ transaction.getId());
@@ -324,7 +342,7 @@ public class ClientHandler implements Callable{
 				}
 				transactionManager.addOperation(transaction,read,desiredRM.getRMtype(),clientCommand);
 				System.out.println(transaction.toString());
-				
+
 				//start requesting RM
 				System.out.println("Requesting RM: " + desiredRM.toString());
 				Socket handler = desiredRM.getSocket();
@@ -343,29 +361,29 @@ public class ClientHandler implements Callable{
 					transactionManager.abort(transaction);
 					lockManager.UnlockAll(transaction.getId());
 				}
-				//get RM's response	
+				//get RM's response
 				System.out.println("Requesting RM response.");
 				String ret = null;
 				synchronized (handler) {
 					BufferedReader inFromServer = new BufferedReader(
 			    			new InputStreamReader(handler.getInputStream()));
 			   		DataOutputStream outToServer = new DataOutputStream(handler.getOutputStream());
-			   		outToServer.writeBytes(clientCommand + '\n'); 		
+			   		outToServer.writeBytes(clientCommand + '\n');
 			   		ret = inFromServer.readLine();
-				} 
+				}
 	   		System.out.println("FROM RM SERVER: " + ret);
-				
+
 		   		if(ret == null) ret = "empty";
 				outToClient.writeBytes(ret + '\n');
 				System.out.println("Finish writing back to client.");
-				
+
 			}else{
 				System.out.println("Wrong command.");
 				break;
 			}
-			
+
 		}
 		return null;
-		
+
 	}
 }
