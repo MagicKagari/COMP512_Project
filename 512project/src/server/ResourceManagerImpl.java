@@ -46,11 +46,11 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     String _name;
 
     public enum RMCrashType {
-        CRASH_AFTER_RECEIVE_VOTE_REQUEST_BUT_BEFORE_SENDING_ANSWER(1),
-        WHICH_ANSWER_TO_SEND_COMMIT_OR_ABORT(2), //what the heck is this
-        CRASH_AFTER_SENDING_ANSWER(3),
-        CRASH_AFTER_RECEIVING_DECISION_BUT_BEFORE_COMMITTING_OR_ABORTING(4),
-        NO_CRASH(0)
+        CRASH_AFTER_RECEIVE_VOTE_REQUEST_BUT_BEFORE_SENDING_ANSWER,
+        WHICH_ANSWER_TO_SEND_COMMIT_OR_ABORT, //what the heck is this
+        CRASH_AFTER_SENDING_ANSWER,
+        CRASH_AFTER_RECEIVING_DECISION_BUT_BEFORE_COMMITTING_OR_ABORTING,
+        NO_CRASH
     }
     RMCrashType crashType = RMCrashType.NO_CRASH;
     
