@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import middleware.Middleware;
 import middleware.RMmeta;
+import middleware.Middleware.MiddlewareCrashType;
 
 public class TransactionManager {
 
@@ -63,6 +64,7 @@ public class TransactionManager {
 		t.addCommand("commit","commit");
 		List<RMmeta> rms = middleware.resourceManagers;
 		synchronized (rms) {
+		    
 		    boolean result = true;
 		    //ask each rm to vote
             for(RMmeta rm : rms){
@@ -73,6 +75,13 @@ public class TransactionManager {
                                 new InputStreamReader(s.getInputStream()));
                         DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
                         outToServer.writeBytes("vote,"+t.getId()+'\n');
+                        
+                        //crash point
+                        if(middleware.crashType == MiddlewareCrashType.CRASH_AFTER_SENDING_VOTE_REQUEST_AND_BEFORE_RECEIVING_ANY_REPLIES){
+                            System.out.println(middleware.crashType.toString());
+                            System.exit(1);    
+                        }
+                                               
                         String ret = inFromServer.readLine();
                         //if any return null(crash) or no then result is false
                         if(ret==null || ret.compareToIgnoreCase("no")==0) result = false;
@@ -81,9 +90,21 @@ public class TransactionManager {
                     }
                 }
             }
+            //crash point
+            if(middleware.crashType == MiddlewareCrashType.CRASH_AFTER_RECEIVING_ALL_REPLIES_BUT_BEFORE_DECIDING){
+                System.out.println(middleware.crashType.toString());
+                System.exit(1);  
+            }
+            
             
             //if all vote yes, then commit
             if(result){
+                System.out.println("Decide to commit:" + t.toString());
+                //crash point
+                if(middleware.crashType == MiddlewareCrashType.CRASH_AFTER_DECIDING_BUT_BEFORE_SENDING_DECISION){
+                    System.out.println(middleware.crashType.toString());
+                    System.exit(1);  
+                }
                 for(RMmeta rm : rms){
                     Socket s = rm.getSocket();
                     synchronized (s) {
@@ -94,6 +115,12 @@ public class TransactionManager {
                             outToServer.writeBytes("commit,"+t.getId() + '\n');      
                             System.out.println(inFromServer.readLine());
                             
+                            //crash point
+                            if(middleware.crashType == MiddlewareCrashType.CRASH_AFTER_SENDING_SOME_BUT_NOT_ALL_DECISIONS){
+                                System.out.println(middleware.crashType.toString());
+                                System.exit(1);  
+                            }
+                            
                        }catch(Exception e){
                             e.printStackTrace();
                         }
@@ -102,7 +129,12 @@ public class TransactionManager {
                 t.addCommand("commit","commit");
             //if any vote no, then abort    
             }else{
-                System.out.println("ABORTING: "+t.toString());
+                System.out.println("Decide to abort: "+t.toString());
+                //crash point
+                if(middleware.crashType == MiddlewareCrashType.CRASH_AFTER_DECIDING_BUT_BEFORE_SENDING_DECISION){
+                    System.out.println(middleware.crashType.toString());
+                    System.exit(1);  
+                }
                 for(RMmeta rm : rms){
                     Socket s = rm.getSocket();
                     synchronized (s) {
@@ -112,17 +144,28 @@ public class TransactionManager {
                             DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
                             outToServer.writeBytes("abort,"+t.getId() + '\n');      
                             System.out.println(inFromServer.readLine());
+                            
+                            //crash point
+                            if(middleware.crashType == MiddlewareCrashType.CRASH_AFTER_SENDING_SOME_BUT_NOT_ALL_DECISIONS){
+                                System.out.println(middleware.crashType.toString());
+                                System.exit(1);  
+                            }
+                            
                         }catch(Exception e){
                             e.printStackTrace();
                         }
                     }
                 }
-                this.middleware.lockManager.UnlockAll(t.getId());
                 t.addCommand("abort","abort");
-                
+            }
+            //crash point
+            if(middleware.crashType == MiddlewareCrashType.CRASH_AFTER_HAVING_SENT_ALL_DECISIONS){
+                System.out.println(middleware.crashType.toString());
+                System.exit(1);  
             }
 		}
-		transactionTable.remove(t);
+		this.middleware.lockManager.UnlockAll(t.getId());
+        transactionTable.remove(t);
 		return true;
 	}
 	

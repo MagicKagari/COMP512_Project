@@ -15,6 +15,7 @@ import LockManager.LockManager;
 import transaction.Transaction;
 import transaction.TransactionManager;
 import client.Client;
+import middleware.Middleware.MiddlewareCrashType;
 
 public class ClientHandler implements Callable{
 
@@ -73,6 +74,12 @@ public class ClientHandler implements Callable{
 			}
 
 			if(clientCommand.equals("commit")){
+			    //crash point
+			    if(middleware.crashType==MiddlewareCrashType.CRASH_BEFORE_SEND_BOTE_REQUEST){
+			        System.out.println(middleware.crashType.toString());
+			        System.exit(1);
+			    }
+			    
 				boolean ret = transactionManager.commit(transaction);
 				synchronized (outToClient) {
 				    if(ret){

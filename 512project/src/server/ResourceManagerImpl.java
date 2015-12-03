@@ -45,13 +45,14 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     int _port;
     String _name;
 
-    enum RMCrashType {
+    public enum RMCrashType {
         CRASH_AFTER_RECEIVE_VOTE_REQUEST_BUT_BEFORE_SENDING_ANSWER,
-        WHICH_ANSWER_TO_SEND_COMMIT_OR_ABORT,
+        WHICH_ANSWER_TO_SEND_COMMIT_OR_ABORT, //what the heck is this
         CRASH_AFTER_SENDING_ANSWER,
-        CRASH_AFTER_RECEIVING_DECISION_BUT_BEFORE_COMMITTING_OR_ABORTING
+        CRASH_AFTER_RECEIVING_DECISION_BUT_BEFORE_COMMITTING_OR_ABORTING,
+        NO_CRASH
     }
-    RMCrashType crashType;
+    RMCrashType crashType = RMCrashType.NO_CRASH;
     
     //Added for M3
     MasterRecord mRecord;
@@ -152,8 +153,13 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 				                middlewareSocket.getOutputStream());
 					    continue;
 					}
-
-					outToClient.writeBytes(decodeCommand(middlewareCommand) + "\n");
+					String ret = decodeCommand(middlewareCommand)+'\n';
+					//crash point
+		             if(crashType == RMCrashType.CRASH_AFTER_SENDING_ANSWER){
+		                 System.out.println(crashType.toString());
+		                 selfDestruct();
+		             }
+					outToClient.writeBytes(ret);
 				}
 			}
 		}
@@ -729,7 +735,12 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                 }
              break;
          case 24://commit
-
+             //crash point
+             if(crashType == RMCrashType.CRASH_AFTER_RECEIVING_DECISION_BUT_BEFORE_COMMITTING_OR_ABORTING){
+                 System.out.println(crashType.toString());
+                 selfDestruct();
+             }
+             
              try {
                  id = Client.getInt(arguments.elementAt(1));
                  RMHashtable t = transaction_table.get(new Integer(id));
@@ -784,7 +795,16 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
              break;
 
          case 25://abort
+             
+             //crash point
+             if(crashType == RMCrashType.CRASH_AFTER_RECEIVING_DECISION_BUT_BEFORE_COMMITTING_OR_ABORTING){
+                 System.out.println(crashType.toString());
+                 selfDestruct();
+             }
+             
+             
              try {
+                 
                  id = Client.getInt(arguments.elementAt(1));
                  boolean isFound = false;
                  if(transaction_table.keySet().contains(new Integer(id))){
@@ -819,10 +839,11 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
          case 27: // vote
              System.out.println("Vote");
 
-             if(crashCase == 1){
-               selfDestruct();
+             //crash point
+             if(crashType == RMCrashType.CRASH_AFTER_RECEIVE_VOTE_REQUEST_BUT_BEFORE_SENDING_ANSWER){
+                 System.out.println(crashType.toString());
+                 selfDestruct();
              }
-
                 try {
                     //TODO:vote checking
                     id = Client.getInt(arguments.elementAt(1));
