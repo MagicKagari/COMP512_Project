@@ -846,8 +846,8 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
               break;
             }
             try {
-              if(arguments.elementAt(2).equals(serviceName)){
-                crashCase = argumens.elementAt(1);
+              if(arguments.elementAt(2).equals(_name)){
+                crashCase = Client.getInt(arguments.elementAt(1));
               }
             }
             catch (Exception e) {
@@ -1332,7 +1332,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     }
 
     private void selfDestruct() {
-      system.exit(1);
+      System.exit(1);
     }
 
 }
