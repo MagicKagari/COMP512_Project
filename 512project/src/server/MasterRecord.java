@@ -12,6 +12,7 @@ public class MasterRecord implements Serializable {
     private int transactionID;
     private String fileA = "./records/fileA.rm";
     private String fileB = "./records/fileB.rm";
+    private String master = "./records/MasterRecord.rm";
     String RMtype;
     String name;
     
@@ -20,6 +21,7 @@ public class MasterRecord implements Serializable {
         this.isAMaster = true;
         fileA = "./records/"+name+"fileA.rm";
         fileB = "./records/"+name+"fileB.rm";
+        master = "./records/"+name+"MasterRecord.rm";
         checkRMfiles();
     }
 
@@ -79,7 +81,7 @@ public class MasterRecord implements Serializable {
     
     public boolean updateMasterRecord(){
         //write the current master record to file
-        String path = "./records/MasterRecord.rm";
+        String path = master;
         File f = new File(path);
         try {
             ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f));
