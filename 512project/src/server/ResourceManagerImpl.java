@@ -56,7 +56,6 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     
     //Added for M3
     MasterRecord mRecord;
-    private int crashCase = 0;
 
     public ResourceManagerImpl(String host, int port, String name){
     	_host = host;
@@ -870,17 +869,20 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 
              break;
           case 28: //set crash case
-            if (arguments.size() != 3) {
+            if (arguments.size() != 4) {
               ret = "Wrong argument number.";
               break;
             }
             try {
               if(arguments.elementAt(2).equals(_name)){
-                crashCase = Client.getInt(arguments.elementAt(1));
+                crashType = RMCrashType.values()[Client.getInt(arguments.elementAt(3))];
+                ret = "success";
               }
+                ret = "fail";
             }
             catch (Exception e) {
-              e.printStackTrace();
+                e.printStackTrace();
+                ret = "fail";
             }
             break;
          default:

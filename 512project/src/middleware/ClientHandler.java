@@ -27,8 +27,6 @@ public class ClientHandler implements Callable{
 	TransactionManager transactionManager;
 	LockManager lockManager;
 
-    //M3 crash
-    private int crashCase = 0;
 
 	public ClientHandler(Socket socket, Middleware mw){
 		middleware = mw;
@@ -181,19 +179,37 @@ public class ClientHandler implements Callable{
 
                 //M3 crash
 
-                else if(clientCmds[0].equals("setCrashCaseServer")) {
-                    if(clientCmds[1] != null) {
-                        try {
-                            crashCase = Integer.parseInt(clientCmds[1]);
-                        }
-                        catch(NumberFormatException n) {
-                            n.printStackTrace();
+                else if(clientCmds[0].equals("setCrashCaseMiddleware")) {
+                    if(clientCmds.length == 3) {
+                        if(clientCmds[2] != null) {
+                            try {
+                                middleware.crashType = MiddlewareCrashType.values()[Integer.parseInt(clientCmds[2])];
+                            }
+                            catch(NumberFormatException n) {
+                                n.printStackTrace();
+                            }
                         }
                     }
+                    else {
+                        System.out.println("Wrong command format.");
+                    }
+                    continue;
                 }
-
-				//decode which RM to send to
-				RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
+                
+                //decode which RM to send to
+                RMmeta desiredRM;
+                if(clientCmds[0].equals("setCrashCaseRM")) {
+                    if(clientCmds.length == 4) {
+                        desiredRM = middleware.getResourceManagerOfType(clientCmds[2]);
+                    }
+                    else {
+                        System.out.println("Wrong command format.");
+                        desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
+                    }
+                }
+                else {
+                    desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
+                }
 				//if command is relate to customer or iternary reserve
 				if(desiredRM == null){
 					String firstWord = clientCmds[0];
