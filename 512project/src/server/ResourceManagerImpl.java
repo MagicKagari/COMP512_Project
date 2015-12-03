@@ -129,7 +129,19 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 			synchronized (inFromClient) {
 				synchronized (outToClient) {
 					String middlewareCommand = inFromClient.readLine();     
-					System.out.println("Received: " + middlewareCommand);            
+					System.out.println("Received: " + middlewareCommand);      
+					//TODO: Encouter this due to middleware crashed
+					if(middlewareCommand==null){
+					    System.out.println("Detect middleware crashed.\n");
+					    middlewareSocket = resourceManagerServerSocket.accept();
+					    System.out.println("RM: Connection come in.");
+				        inFromClient = new BufferedReader(
+				                new InputStreamReader(middlewareSocket.getInputStream())); 
+				        outToClient = new DataOutputStream(
+				                middlewareSocket.getOutputStream());
+					    continue;
+					}
+					
 					outToClient.writeBytes(decodeCommand(middlewareCommand) + "\n");
 				}
 			}
