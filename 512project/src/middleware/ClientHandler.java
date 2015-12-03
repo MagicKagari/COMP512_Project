@@ -180,7 +180,7 @@ public class ClientHandler implements Callable{
                 //M3 crash
 
                 else if(clientCmds[0].equals("setCrashCaseMiddleware")) {
-                    if(clientCmds.size() == 3) {
+                    if(clientCmds.length == 3) {
                         if(clientCmds[2] != null) {
                             try {
                                 middleware.crashType = MiddlewareCrashType.values()[Integer.parseInt(clientCmds[2])];
@@ -197,16 +197,18 @@ public class ClientHandler implements Callable{
                 }
                 
                 //decode which RM to send to
+                RMmeta desiredRM;
                 if(clientCmds[0].equals("setCrashCaseRM")) {
-                    if(clientCmds.size() == 4) {
-                        RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[2]);
+                    if(clientCmds.length == 4) {
+                        desiredRM = middleware.getResourceManagerOfType(clientCmds[2]);
                     }
                     else {
                         System.out.println("Wrong command format.");
+                        desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
                     }
                 }
                 else {
-                    RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
+                    desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
                 }
 				//if command is relate to customer or iternary reserve
 				if(desiredRM == null){
