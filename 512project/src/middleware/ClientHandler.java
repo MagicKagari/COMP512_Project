@@ -179,7 +179,7 @@ public class ClientHandler implements Callable{
 
                 //M3 crash
 
-                else if(clientCmds[0].equals("setCrashCaseMiddleware")) {
+                else if(clientCmds[0].equals("setCrashCaseMW")) {
                     if(clientCmds.length == 3) {
                         if(clientCmds[2] != null) {
                             try {
