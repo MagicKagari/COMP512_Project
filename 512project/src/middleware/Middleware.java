@@ -30,6 +30,17 @@ public class Middleware {
     TransactionManager transactionManager;
 	ServerSocket mainListener;
 
+	enum MiddlewareCrashType{
+	    CRASH_BEFORE_SEND_BOTE_REQUEST,
+	    CRASH_AFTER_SENDING_VOTE_REQUEST_AND_BEFORE_RECEIVING_ANY_REPLIES,
+	    CRASH_AFTER_RECEIVING_SOME_REPLIES_BUT_NOT_ALL,
+	    CRASH_AFTER_RECEIVING_ALL_REPLIES_BUT_BEFORE_DECIDING,
+	    CRASH_AFTER_DECIDING_BUT_BEFORE_SENDING_DECISION,
+	    CRASH_AFTER_SENDING_SOME_BUT_NOT_ALL_DECISIONS,
+	    CRASH_AFTER_HAVING_SENT_ALL_DECISIONS
+	}
+	public MiddlewareCrashType crashType;
+	
 	/* constructor */
 	public Middleware(String host, int port){
 		

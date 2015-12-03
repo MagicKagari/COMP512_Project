@@ -45,6 +45,14 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     int _port;
     String _name;
 
+    enum RMCrashType {
+        CRASH_AFTER_RECEIVE_VOTE_REQUEST_BUT_BEFORE_SENDING_ANSWER,
+        WHICH_ANSWER_TO_SEND_COMMIT_OR_ABORT,
+        CRASH_AFTER_SENDING_ANSWER,
+        CRASH_AFTER_RECEIVING_DECISION_BUT_BEFORE_COMMITTING_OR_ABORTING
+    }
+    RMCrashType crashType;
+    
     //Added for M3
     MasterRecord mRecord;
     private int crashCase = 0;

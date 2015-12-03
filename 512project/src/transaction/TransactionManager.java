@@ -74,7 +74,8 @@ public class TransactionManager {
                         DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
                         outToServer.writeBytes("vote,"+t.getId()+'\n');
                         String ret = inFromServer.readLine();
-                        if(ret.compareToIgnoreCase("no")==0) result = false;
+                        //if any return null(crash) or no then result is false
+                        if(ret==null || ret.compareToIgnoreCase("no")==0) result = false;
                     }catch(Exception e){
                         e.printStackTrace();
                     }
