@@ -45,6 +45,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     
     //Added for M3
     MasterRecord mRecord;
+    private int crashCase = 0;
     
     public ResourceManagerImpl(String host, int port, String name){
     	_host = host;

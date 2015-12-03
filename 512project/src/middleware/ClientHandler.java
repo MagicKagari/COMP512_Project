@@ -25,6 +25,9 @@ public class ClientHandler implements Callable{
 	Transaction transaction;
 	TransactionManager transactionManager;
 	LockManager lockManager;
+    
+    //M3 crash
+    private int crashCase = 0;
 
 	public ClientHandler(Socket socket, Middleware mw){
 		middleware = mw;
@@ -121,6 +124,21 @@ public class ClientHandler implements Callable{
                     }
 			        continue;
 			    }
+                
+                //M3 crash
+                
+                else if(clientCmds[0].equals("setCrashCaseServer")) {
+                    if(clientCmds[1] != null) {
+                        try {
+                            crashCase = Integer.parseInt(clientCmds[1]);
+                        }
+                        catch(NumberFormatException n) {
+                            n.printStackTrace();
+                        }
+                    }
+                }
+
+                
 				//decode which RM to send to
 				RMmeta desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
 				//if command is relate to customer or iternary reserve
