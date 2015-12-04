@@ -602,6 +602,9 @@ public class Client{
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
+                    
+                break;
+                    
             default:
                 System.out.println("The interface does not support this command.");
                 break;
