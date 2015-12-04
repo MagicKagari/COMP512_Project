@@ -213,11 +213,26 @@ public class ClientHandler implements Callable{
                 if(clientCmds[0].equals("setCrashCaseRM")) {
                     if(clientCmds.length == 4) {
                         desiredRM = middleware.getResourceManagerOfType(clientCmds[2]);
+                        System.out.println("got desiredRM for setting crash case");
+                        Socket s = desiredRM.getSocket();
+                        synchronized (s) {
+                            try {
+                                BufferedReader inFromServer = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                                DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
+                                outToServer.writeBytes(clientCmds[0]+","+transaction.getId()+","+clientCmds[2]+","+clientCmds[3]+'\n');
+                                String ret = inFromServer.readLine();
+                            }
+                            catch(Exception e){
+                                e.printStackTrace();
+                            }
+                        }
                     }
                     else {
                         System.out.println("Wrong command format.(MW)");
-                        desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
+                        desiredRM = null;
                     }
+                    desiredRM = null;
+                    continue;
                 }
                 else {
                     desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);

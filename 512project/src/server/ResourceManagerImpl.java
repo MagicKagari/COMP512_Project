@@ -876,13 +876,13 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             try {
               if(arguments.elementAt(2).equals(_name)){
                 crashType = RMCrashType.values()[Client.getInt(arguments.elementAt(3))];
-                ret = "success";
+                ret = "Success";
               }
-                ret = "fail";
+                ret = "Fail";
             }
             catch (Exception e) {
                 e.printStackTrace();
-                ret = "fail";
+                ret = "Fail";
             }
             break;
          default:
