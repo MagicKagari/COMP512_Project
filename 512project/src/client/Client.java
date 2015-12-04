@@ -573,19 +573,38 @@ public class Client{
                 break;
             case 28:
                 //crash,COMPONENT
-                if(arguments.size()!=2){
+                //set crash case for RM
+                if(arguments.size()!=3){
                     wrongNumber();
                     break;
                 }
                     try {
                         String component = getString(arguments.elementAt(1));
-                        sendMessage(String.format("crash,%d,%s",id, component));
+                        String component2 = getString(arguments.elementAt(2));
+                        sendMessage(String.format("setCrashCaseRM,%d,%s,%s",id, component, component2));
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
 
                 break;
+            
+            case 29:
+                //set crash case for middleware
+                if(arguments.size() !=2){
+                    wrongNumber();
+                    break;
+                }
+                    try {
+                        String component = getString(arguments.elementAt(1));
+                        sendMessage(String.format("setCrashCaseMW,%d,%s",id, component));
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    
+                break;
+                    
             default:
                 System.out.println("The interface does not support this command.");
                 break;
@@ -662,8 +681,10 @@ public class Client{
         else if (argument.compareToIgnoreCase("vote") == 0)
             //for middleware and rm use only
             return 27;
-				else if (argument.compareToIgnoreCase("setCrashCaseRM") == 0)
-						return 28;
+        else if (argument.compareToIgnoreCase("setCrashCaseRM") == 0)
+            return 28;
+        else if (argument.compareToIgnoreCase("setCrashCaseMW") == 0)
+            return 29;
         else
             return 666;
     }
