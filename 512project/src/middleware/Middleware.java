@@ -31,7 +31,7 @@ public class Middleware {
 	ServerSocket mainListener;
 
 	public enum MiddlewareCrashType{
-	    CRASH_BEFORE_SEND_BOTE_REQUEST,
+	    CRASH_BEFORE_SEND_VOTE_REQUEST,
 	    CRASH_AFTER_SENDING_VOTE_REQUEST_AND_BEFORE_RECEIVING_ANY_REPLIES,
 	    CRASH_AFTER_RECEIVING_SOME_REPLIES_BUT_NOT_ALL, //hard to implement this one
 	    CRASH_AFTER_RECEIVING_ALL_REPLIES_BUT_BEFORE_DECIDING,
@@ -192,5 +192,20 @@ public class Middleware {
 	
 	public int getPort(){
 		return _port;
+	}
+	
+	//check if a socket is connected
+	public static boolean checkSocket(Socket s){
+	    synchronized (s) {
+            try {
+                if(s.getInputStream().read() == -1) return false;
+                else return true;
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+           
+        }
+	    return true;
 	}
 }

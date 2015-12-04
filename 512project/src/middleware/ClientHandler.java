@@ -73,7 +73,7 @@ public class ClientHandler implements Callable{
 
 			if(clientCommand.equals("commit")){
 			    //crash point
-			    if(middleware.crashType==MiddlewareCrashType.CRASH_BEFORE_SEND_BOTE_REQUEST){
+			    if(middleware.crashType==MiddlewareCrashType.CRASH_BEFORE_SEND_VOTE_REQUEST){
 			        System.out.println(middleware.crashType.toString());
 			        System.exit(1);
 			    }

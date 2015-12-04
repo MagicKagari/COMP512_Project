@@ -34,7 +34,7 @@
 	</target>
 	
     <target name="server" depends="build-server">
-    	<java classname="server.ResourceManagerImpl">
+    	<java classname="server.ResourceManagerImpl" fork="true">
     		<classpath>
     	    	<path refid="jaxws.classpath"/>
     	    	<pathelement location="${basedir}/build/classes"/>
@@ -56,7 +56,7 @@
     </target>
 
     <target name="client" depends="build-client">
-        <java classname="client.Client">
+        <java classname="client.Client" fork="true">
             <classpath>
                 <path refid="jaxws.classpath"/>
                 <pathelement location="${basedir}/build/classes"/>
@@ -78,7 +78,7 @@
 	</target>
 	
 	<target name="middleware" depends="build-middleware">
-		<java classname="middleware.Middleware">
+		<java classname="middleware.Middleware" fork="true">
 			<classpath>
 		    	<path refid="jaxws.classpath"/>
 		        <pathelement location="${basedir}/build/classes"/>

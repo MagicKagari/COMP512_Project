@@ -867,7 +867,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             }
             try {
                 crashType = RMCrashType.values()[Client.getInt(arguments.elementAt(3))];
-                System.out.println("set crash" + crashType.toString());
+                System.out.println("set crash case: " + crashType.toString());
                 ret = "Success";
             }
             catch (Exception e) {

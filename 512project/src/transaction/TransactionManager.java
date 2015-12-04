@@ -1,8 +1,10 @@
 package transaction;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,8 +65,9 @@ public class TransactionManager {
 		System.out.println("COMMIT: "+t.toString());
 		t.addCommand("commit","commit");
 		List<RMmeta> rms = middleware.resourceManagers;
+		List<RMmeta> crashedRM = new LinkedList<RMmeta>();
+        
 		synchronized (rms) {
-		    
 		    boolean result = true;
 		    //ask each rm to vote
             for(RMmeta rm : rms){
@@ -84,7 +87,13 @@ public class TransactionManager {
                                                
                         String ret = inFromServer.readLine();
                         //if any return null(crash) or no then result is false
-                        if(ret==null || ret.compareToIgnoreCase("no")==0) result = false;
+                        if(ret == null){
+                            //add crash rm into list
+                            crashedRM.add(rm);
+                            System.out.println("Found a crashed rm:" + rm.toString());
+                            result = false;
+                        }
+                        else if(ret.compareToIgnoreCase("no")==0) result = false;
                     }catch(Exception e){
                         e.printStackTrace();
                     }
@@ -96,7 +105,7 @@ public class TransactionManager {
                 System.exit(1);  
             }
             
-            
+            System.out.println("result:" + result);
             //if all vote yes, then commit
             if(result){
                 System.out.println("Decide to commit:" + t.toString());
@@ -106,6 +115,7 @@ public class TransactionManager {
                     System.exit(1);  
                 }
                 for(RMmeta rm : rms){
+                    if(crashedRM.contains(rm)) continue; //skip crashed rms
                     Socket s = rm.getSocket();
                     synchronized (s) {
                         try{
@@ -114,7 +124,6 @@ public class TransactionManager {
                             DataOutputStream outToServer = new DataOutputStream(s.getOutputStream());
                             outToServer.writeBytes("commit,"+t.getId() + '\n');      
                             System.out.println(inFromServer.readLine());
-                            
                             //crash point
                             if(middleware.crashType == MiddlewareCrashType.CRASH_AFTER_SENDING_SOME_BUT_NOT_ALL_DECISIONS){
                                 System.out.println(middleware.crashType.toString());
@@ -136,6 +145,7 @@ public class TransactionManager {
                     System.exit(1);  
                 }
                 for(RMmeta rm : rms){
+                    if(crashedRM.contains(rm)) continue; //skip crashed rms
                     Socket s = rm.getSocket();
                     synchronized (s) {
                         try{
