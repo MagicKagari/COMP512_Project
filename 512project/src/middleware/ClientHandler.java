@@ -213,10 +213,11 @@ public class ClientHandler implements Callable{
                 if(clientCmds[0].equals("setCrashCaseRM")) {
                     if(clientCmds.length == 4) {
                         desiredRM = middleware.getResourceManagerOfType(clientCmds[2]);
+                        System.out.println("got desiredRM for setting crash case");
                     }
                     else {
                         System.out.println("Wrong command format.(MW)");
-                        desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
+                        desiredRM = null;
                     }
                 }
                 else {
