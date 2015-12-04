@@ -731,7 +731,6 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                  System.out.println(crashType.toString());
                  selfDestruct();
              }
-             
              try {
                  id = Client.getInt(arguments.elementAt(1));
                  RMHashtable t = transaction_table.get(new Integer(id));
@@ -739,7 +738,14 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                      ret = "No such transaction to commit.";
                      break;
                  }
-                 Long lastTime = lastTransactionActivityTime.get(new Integer(id));
+                 
+                 if(!isTransactionModified.get(new Integer(id))){
+                     //nothing to commit just delete
+                     transaction_table.remove(new Integer(id));
+                     lastTransactionActivityTime.remove(new Integer(id));
+                     isTransactionModified.remove(new Integer(id));
+                 }
+                  Long lastTime = lastTransactionActivityTime.get(new Integer(id));
                  synchronized (lastModifiedTime) {
                     synchronized (m_itemHT) {
                         if(lastTime < lastModifiedTime && isTransactionModified.get(new Integer(id))){
