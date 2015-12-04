@@ -744,6 +744,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                      transaction_table.remove(new Integer(id));
                      lastTransactionActivityTime.remove(new Integer(id));
                      isTransactionModified.remove(new Integer(id));
+                     ret = "Nothing to commit.";
                  }
                   Long lastTime = lastTransactionActivityTime.get(new Integer(id));
                  synchronized (lastModifiedTime) {

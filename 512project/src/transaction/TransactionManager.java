@@ -173,6 +173,12 @@ public class TransactionManager {
                 System.out.println(middleware.crashType.toString());
                 System.exit(1);  
             }
+            //remove all crashed rm
+            for(RMmeta rm : crashedRM){
+                if(rms.remove(rm)) System.out.println("remove rm: "+rm.toString());
+                else System.out.println("cannot remove rm: "+rm.toString());
+            }
+            
 		}
 		this.middleware.lockManager.UnlockAll(t.getId());
         transactionTable.remove(t);
