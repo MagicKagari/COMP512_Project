@@ -184,6 +184,7 @@ public class ClientHandler implements Callable{
                         if(clientCmds[2] != null) {
                             try {
                                 middleware.crashType = MiddlewareCrashType.values()[Integer.parseInt(clientCmds[2])];
+                                System.out.println("crash case now is: "+middleware.crashType.toString());
                             }
                             catch(NumberFormatException n) {
                                 n.printStackTrace();

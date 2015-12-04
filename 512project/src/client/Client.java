@@ -580,7 +580,7 @@ public class Client{
                 }
                     try {
                         String component = getString(arguments.elementAt(1));
-                        String component2 = getString(argument.elementAt(2));
+                        String component2 = getString(arguments.elementAt(2));
                         sendMessage(String.format("setCrashCaseRM,%d,%s,%s",id, component, component2));
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
@@ -591,13 +591,13 @@ public class Client{
             
             case 29:
                 //set crash case for middleware
-                if(argument.size() !=2){
+                if(arguments.size() !=2){
                     wrongNumber();
                     break;
                 }
                     try {
                         String component = getString(arguments.elementAt(1));
-                        sendMessage(String.format("setCrashCaseRM,%d,%s",id, component));
+                        sendMessage(String.format("setCrashCaseMW,%d,%s",id, component));
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
