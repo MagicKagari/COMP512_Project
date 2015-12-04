@@ -750,7 +750,6 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                             isTransactionModified.remove(new Integer(id));
                         }else{
                             m_itemHT = t;
-
                             //Added for M3
                             try {
                                 String destFile = mRecord.getPathA();
@@ -844,6 +843,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                         break;
                     }
                     Long lastTime = lastTransactionActivityTime.get(new Integer(id));
+                    //System.out.println(lastTime + " " + lastModifiedTime + " "+isTransactionModified.get(new Integer(id)));
                     synchronized (lastModifiedTime) {
                         synchronized (m_itemHT) {
                             if(lastTime < lastModifiedTime && isTransactionModified.get(new Integer(id))){
@@ -904,7 +904,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         RMHashtable t = transaction_table.get(new Integer(id));
         synchronized(t){
             t.put(key, value);
-            lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+            //lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
             isTransactionModified.put(new Integer(id), new Boolean(true));
         }
         /*
@@ -918,7 +918,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     protected RMItem removeData(int id, String key) {
         RMHashtable t = transaction_table.get(new Integer(id));
         synchronized(t){
-            lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+            //lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
             isTransactionModified.put(new Integer(id), new Boolean(true));
             return (RMItem)t.remove(key);
         }
@@ -946,7 +946,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                 removeData(id, curObj.getKey());
                 RMHashtable t = transaction_table.get(new Integer(id));
                 synchronized(t){
-                    lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+                    //lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
                     isTransactionModified.put(new Integer(id), new Boolean(true));
                 }
                 Trace.info("RM::deleteItem(" + id + ", " + key + ") OK.");
@@ -1017,7 +1017,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             item.setReserved(item.getReserved() + 1);
             RMHashtable t = transaction_table.get(new Integer(id));
             synchronized(t){
-                lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
+                //lastTransactionActivityTime.put(new Integer(id), new Long(System.currentTimeMillis()));
                 isTransactionModified.put(new Integer(id), new Boolean(true));
             }
 

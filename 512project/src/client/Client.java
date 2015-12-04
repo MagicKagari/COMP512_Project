@@ -56,6 +56,11 @@ public class Client{
     	try{
     		outToServer.writeBytes(str + '\n');
     		String ret = inFromServer.readLine();
+    		if(ret == null){
+    		    System.out.println("Detect middleware crashed");
+    		    System.exit(1); 
+    		}
+    		
     		System.out.println("FROM SERVER: " + ret);
     	}catch (IOException e){
     		e.printStackTrace();
