@@ -180,19 +180,30 @@ public class ClientHandler implements Callable{
                 //M3 crash
 
                 else if(clientCmds[0].equals("setCrashCaseMW")) {
+                    boolean setRet = true;
                     if(clientCmds.length == 3) {
                         if(clientCmds[2] != null) {
                             try {
                                 middleware.crashType = MiddlewareCrashType.values()[Integer.parseInt(clientCmds[2])];
                                 System.out.println("crash case now is: "+middleware.crashType.toString());
+                                setRet = true;
                             }
                             catch(NumberFormatException n) {
                                 n.printStackTrace();
+                                setRet = false;
                             }
                         }
                     }
                     else {
                         System.out.println("Wrong command format.");
+                        setRet = false;
+                    }
+                    synchronized (outToClient) {
+                        if(setRet){
+                            outToClient.writeBytes("set crash case success\n");
+                        }else{
+                            outToClient.writeBytes("set crash case failed\n");
+                        }
                     }
                     continue;
                 }
@@ -204,7 +215,7 @@ public class ClientHandler implements Callable{
                         desiredRM = middleware.getResourceManagerOfType(clientCmds[2]);
                     }
                     else {
-                        System.out.println("Wrong command format.");
+                        System.out.println("Wrong command format.(MW)");
                         desiredRM = middleware.getResourceManagerOfType(clientCmds[0]);
                     }
                 }
