@@ -192,16 +192,8 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 
          if(arguments.size() == 0){
         	 return "Empty Command";
-         }else{
-        	 for(int i=1; i<arguments.size();i++){
-        		 String s = (String)arguments.get(i);
-        		 try{
-        			 Integer.parseInt(s);
-        		 }catch(NumberFormatException e){
-        			 return "Wrong command format";
-        		 }
-        	 }
          }
+         
          System.out.println("Command: " + command);
          //decide which of the commands this was
          switch(Client.findChoice((String) arguments.elementAt(0))) {
@@ -869,16 +861,14 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 
              break;
           case 28: //set crash case
-            if (arguments.size() != 4) {
+             if (arguments.size() != 4) {
               ret = "Wrong argument number.";
               break;
             }
             try {
-              if(arguments.elementAt(2).equals(_name)){
                 crashType = RMCrashType.values()[Client.getInt(arguments.elementAt(3))];
+                System.out.println("set crash" + crashType.toString());
                 ret = "Success";
-              }
-                ret = "Fail";
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -887,6 +877,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             break;
          default:
              System.out.println("The interface does not support this command.");
+             ret = "The interface does not support this command.";
              break;
          }//end switch
 		return ret;
